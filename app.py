@@ -1,5 +1,6 @@
 from flask import Flask, jsonify, render_template, request
-from grid_module import Grid  # Ensure you import the Grid class
+# from grid_module import Grid  # Ensure you import the Grid class
+from grid_breakdown import Grid  # Ensure you import the Grid class
 
 app = Flask(__name__)
 
@@ -22,19 +23,19 @@ def get_data():
         return jsonify({"error": str(e)}), 500
     
 
-@app.route('/get_adjacent_data', methods=['GET'])
-def get_adjacent_data():
-    file_name = request.args.get('file')
-    if not file_name:
-        return jsonify({"error": "File name is required"}), 400
+# @app.route('/get_adjacent_data', methods=['GET'])
+# def get_adjacent_data():
+#     file_name = request.args.get('file')
+#     if not file_name:
+#         return jsonify({"error": "File name is required"}), 400
         
-    file_path = f'data/{file_name}'  # Adjust the path as needed
-    try:
-        grid = Grid(file_path)
-        data = grid.write_grid('adjacent')
-        return jsonify(data)
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+#     file_path = f'data/{file_name}'  # Adjust the path as needed
+#     try:
+#         grid = Grid(file_path)
+#         data = grid.write_grid('adjacent')
+#         return jsonify(data)
+#     except Exception as e:
+#         return jsonify({"error": str(e)}), 500
     
 
 if __name__ == '__main__':

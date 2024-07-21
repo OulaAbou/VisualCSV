@@ -151,7 +151,7 @@ class Grid:
     ## This is where you make it suitable for JSON. If you decide to drop JSON, then leave the rest as
     ## it is.
     
-    def write_grid(self):
+    def write_grid(self, clusering_type = 'non_adjacent'):
         bars = self.generate_bars()
         JSON_data = []
 
@@ -171,15 +171,15 @@ class Grid:
         
         
         
-grid1 = Grid('./Data/archive/2015-16/champs.csv')
+# grid1 = Grid('./Data/archive/2015-16/champs.csv')
 # print(grid1.custom_clustering(grid1.create_matrix()))
-print(grid1.write_grid())
+# print(grid1.write_grid())
 
 
-json_grid1 = './15-16-grid-breakdown.json'
+# json_grid1 = './15-16-grid-breakdown.json'
 
-with open(json_grid1, 'w') as write_data:
-     json.dump(grid1.write_grid(), write_data, indent=4)
+# with open(json_grid1, 'w') as write_data:
+#      json.dump(grid1.write_grid(), write_data, indent=4)
 
 
 

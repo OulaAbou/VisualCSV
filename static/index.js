@@ -49,21 +49,21 @@ button.addEventListener('click', () => {
 });
 document.body.appendChild(button);
 
-const adjacentButton = document.createElement('button');
-adjacentButton.textContent = 'Get Adjacent Data';
-adjacentButton.style.position = 'fixed';
-adjacentButton.style.top = '50px';
-adjacentButton.style.right = '10px';
-adjacentButton.addEventListener('click', () => {
-    const fileName = 'archive/2015-16/champs.csv';
-    fetch(`/get_adjacent_data?file=${fileName}`)
-        .then(response => response.json())
-        .then(data => {
-            if (data.error) {
-                console.error(data.error);
-            } else {
-                createVisualization(data);
-            }
-        });
-});
-document.body.appendChild(adjacentButton);
+// const adjacentButton = document.createElement('button');
+// adjacentButton.textContent = 'Get Adjacent Data';
+// adjacentButton.style.position = 'fixed';
+// adjacentButton.style.top = '50px';
+// adjacentButton.style.right = '10px';
+// adjacentButton.addEventListener('click', () => {
+//     const fileName = 'archive/2015-16/champs.csv';
+//     fetch(`/get_adjacent_data?file=${fileName}`)
+//         .then(response => response.json())
+//         .then(data => {
+//             if (data.error) {
+//                 console.error(data.error);
+//             } else {
+//                 createVisualization(data);
+//             }
+//         });
+// });
+// document.body.appendChild(adjacentButton);
