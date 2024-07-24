@@ -14,7 +14,10 @@ function createVisualization(data) {
         .attr('x', d => d.x)
         .attr('height', d => d.height)
         .attr('width', d => d.width)
-        .attr('fill', d => d.fill);
+        .attr('fill', d => d.fill)
+        .on('click', function(d) {
+            console.log(d.data);
+        });
 
     // Append the enter selection to the DOM
     rects.enter()
@@ -23,11 +26,16 @@ function createVisualization(data) {
             .attr('x', d => d.x)
             .attr('height', d => d.height)
             .attr('width', d => d.width)
-            .attr('fill', d => d.fill);
+            .attr('fill', d => d.fill)
+            .on('click', function(d) {
+                console.log(d.data);
+            });
 
     // Remove any rects that are no longer in the data
     rects.exit().remove();
 }
+
+
 
 // Create buttons and fetch data as before
 const button = document.createElement('button');

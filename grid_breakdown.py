@@ -156,13 +156,22 @@ class Grid:
         JSON_data = []
 
         for bar in bars: 
+            data = []
+            for data_point in bar.data:
+                data.append({
+                    # 'x': data_point.x,
+                    # 'y': data_point.y,  ## This is not needed for now
+                    'value': data_point.value,
+                    'type': data_point.type,
+                    'color': data_point.color
+                })
             JSON_data.append({
                 'x': bar.x,
                 'y': bar.y,
                 'height': bar.height,
                 'width': bar.width,
-                'fill': bar.color
-                # 'data': bar.data
+                'fill': bar.color,
+                'data': data
             })
 
         return JSON_data
@@ -172,8 +181,8 @@ class Grid:
         
         
 # grid1 = Grid('./Data/archive/2015-16/champs.csv')
-# print(grid1.custom_clustering(grid1.create_matrix()))
-# print(grid1.write_grid())
+# # # print(grid1.custom_clustering(grid1.create_matrix()))
+# # # print(grid1.write_grid())
 
 
 # json_grid1 = './15-16-grid-breakdown.json'
