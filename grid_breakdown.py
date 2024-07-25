@@ -17,7 +17,8 @@ class DataPoint:
     
 class Bar:
 
-    def __init__(self, x, y, height, width, color, data = []):
+    def __init__(self, id, x, y, height, width, color, data = []):
+        self.id = id
         self.x = x
         self.y = y
         self.height = height
@@ -139,12 +140,15 @@ class Grid:
 
         bars = []
 
+        id = 0
+
         for i, column in enumerate(clustered_columns):
             y = 20
             for j, cluster in enumerate(column):
-                bar = Bar((i+1)*20, y, len(cluster), 10, cluster[0].color, cluster)
+                bar = Bar(id, (i+1)*20, y, len(cluster), 10, cluster[0].color, cluster)
                 bars.append(bar)
-                y += len(cluster)    
+                y += len(cluster) 
+                id += 1   
         
         return bars
     
@@ -166,6 +170,7 @@ class Grid:
                     'color': data_point.color
                 })
             JSON_data.append({
+                'id': bar.id,
                 'x': bar.x,
                 'y': bar.y,
                 'height': bar.height,
