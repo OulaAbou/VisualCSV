@@ -1,6 +1,6 @@
 
 
-def write_data (bar_data):
+def write_bar_data (bar_data):
     """
     This function will take in a bar's data attribute then return a list of data points with their
       attributes to be plotted.
@@ -17,9 +17,9 @@ def write_data (bar_data):
             'y': y,
             'width': width,
             'height': height,
-            'value': data_point.value,
-            'type': data_point.type,
-            'fill': data_point.color
+            'value': data_point['value'],
+            'type': data_point["type"],
+            'fill': data_point["color"]
         })
         y += height + 5
 
