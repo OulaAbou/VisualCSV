@@ -1,6 +1,6 @@
 from flask import Flask, jsonify, render_template, request
 # from grid_module import Grid  # Ensure you import the Grid class
-from grid_breakdown import Grid  # Ensure you import the Grid class
+from grid_module import Grid  # Ensure you import the Grid class
 from inspect_bars_data import  write_bar_data
 import os
 

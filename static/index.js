@@ -54,6 +54,26 @@ function handleCsvRectClick(d) {
     });
 }
 
+// Function to calculate maximum font size
+function calculateFontSize(d) {
+    const maxFontSize = Math.min(d.width, d.height) * 0.6; // Adjust factor as needed
+    return Math.max(10, maxFontSize); // Set a minimum font size
+}
+
+// Function to adjust font size to fit within the rectangle
+function adjustFontSize(textElement, d) {
+    let fontSize = calculateFontSize(d);
+    textElement.style('font-size', `${fontSize}px`);
+
+    // Check if text overflows and adjust font size
+    let bbox = textElement.node().getBBox();
+    while (bbox.width > d.width || bbox.height > d.height) {
+        fontSize -= 1; // Reduce font size by 1px
+        textElement.style('font-size', `${fontSize}px`);
+        bbox = textElement.node().getBBox();
+    }
+}
+
 // Function to append new data to the existing visualization
 function appendNewData(newData) {
     // Clear previous clickedData
@@ -94,7 +114,13 @@ function appendNewData(newData) {
     // Update existing text elements
     texts.attr('x', d => d.x + d.width / 2)
         .attr('y', d => d.y + d.height / 2)
-        .text(d => d.value);
+        .attr('text-anchor', 'middle')
+        .attr('dy', '.35em')
+        .each(function(d) {
+            const textElement = d3.select(this);
+            textElement.text(d.value);
+            adjustFontSize(textElement, d);
+        });
 
     // Append new text elements
     texts.enter()
@@ -103,7 +129,11 @@ function appendNewData(newData) {
             .attr('y', d => d.y + d.height / 2)
             .attr('text-anchor', 'middle')
             .attr('dy', '.35em')
-            .text(d => d.value);
+            .each(function(d) {
+                const textElement = d3.select(this);
+                textElement.text(d.value);
+                adjustFontSize(textElement, d);
+            });
 
     // Remove old text elements
     texts.exit().remove();
@@ -138,7 +168,7 @@ button.style.position = 'fixed';
 button.style.top = '10px';
 button.style.right = '10px';
 button.addEventListener('click', () => {
-    const fileName = 'archive/2015-16/champs.csv';
+    const fileName = 'name.basics.csv';
     fetch(`/get_data?file=${fileName}`)
         .then(response => response.json())
         .then(data => {
