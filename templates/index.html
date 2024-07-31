@@ -45,6 +45,22 @@
             width: 100%;
             height: 100%;
         }
+
+        /* New container styling */
+        .new-container {
+            position: absolute;
+            left: 50%;
+            top: 10%;
+            width: 40%;
+            height: 80%;
+            border: 2px solid blue;  /* Optional: Different border color to differentiate */
+            overflow: auto;  /* Enable scroll */
+        }
+
+        .new-container svg {
+            width: 100%;
+            height: 100%;
+        }
     </style>
 </head>
 <body>
@@ -54,6 +70,12 @@
         <!-- SVG container -->
         <div class="canva">
             <svg width="6000" height="6000">
+                <rect></rect>
+            </svg>
+        </div>
+        <!-- New container for clicked rectangles -->
+        <div class="new-container">
+            <svg width="100%" height="100%">
                 <rect></rect>
             </svg>
         </div>
