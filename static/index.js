@@ -1,4 +1,4 @@
-const svg = d3.select('svg');
+const svg = d3.select('.canva svg');
 let allData = [];
 let clickedData = []; // Track data from clicked rectangles
 
@@ -161,22 +161,20 @@ function handleClickedRectClick(d) {
     });
 }
 
-// Create buttons and fetch data as before
-const button = document.createElement('button');
-button.textContent = 'Fetch Data';
-button.style.position = 'fixed';
-button.style.top = '10px';
-button.style.right = '10px';
-button.addEventListener('click', () => {
-    const fileName = 'top_1000_films.csv';
-    fetch(`/get_data?file=${fileName}`)
-        .then(response => response.json())
-        .then(data => {
-            if (data.error) {
-                console.error(data.error);
-            } else {
-                createVisualization(data);
-            }
-        });
+// Ensure the button is selected and the event listener is attached correctly
+document.addEventListener('DOMContentLoaded', () => {
+    const button = d3.select('.fetch-button');
+    
+    button.on('click', () => {
+        const fileName = 'top_1000_films.csv';
+        fetch(`/get_data?file=${fileName}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    console.error(data.error);
+                } else {
+                    createVisualization(data);
+                }
+            });
+    });
 });
-document.body.appendChild(button);
