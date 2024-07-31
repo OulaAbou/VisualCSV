@@ -110,7 +110,26 @@ class Grid:
                 rows.append(meta_data)
                 y += 1
 
-        rows_matrix = np.array(rows)
+        # Find the maximum length of the subarrays
+        max_length = max(len(subarray) for subarray in rows)
+        # Create a new array with the same number of subarrays, each of max_length, filled with empty strings
+        filled_array = np.full((len(rows), max_length),None,  dtype=object)
+
+        # # Copy the elements from the original subarrays to the new array
+        # for i, subarray in enumerate(rows):
+        #     filled_array[i, :len(subarray)] = subarray
+
+        # Copy the elements from the original subarrays to the new array and fill the rest with DataPoint objects
+        light_grey_js = '#D3D3D3'
+
+        for y, subarray in enumerate(rows):
+            for x in range(max_length):
+                if x < len(subarray):
+                    filled_array[y, x] = subarray[x]
+                else:
+                    filled_array[y, x] = DataPoint(x, y, '', None, light_grey_js)
+
+        rows_matrix = np.array(filled_array)
         columns = rows_matrix.T
         return columns
     
@@ -185,12 +204,12 @@ class Grid:
         
         
         
-grid1 = Grid('./Data/name.basics.csv')
+grid1 = Grid('./Data/top_1000_films.csv')
 # # print(grid1.custom_clustering(grid1.create_matrix()))
 # # print(grid1.write_grid())
 
 
-json_grid1 = './name.basics.json'
+json_grid1 = './top_1000_films.json'
 
 with open(json_grid1, 'w') as write_data:
      json.dump(grid1.write_grid(), write_data, indent=4)
