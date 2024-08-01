@@ -1,5 +1,6 @@
 const svg = d3.select('.canva svg');
 const newSvg = d3.select('.new-container svg');
+
 let allData = [];
 let clickedData = []; // Track data from clicked rectangles
 
@@ -103,7 +104,7 @@ function appendNewData(newData) {
             .attr('height', d => d.height)
             .attr('width', d => d.width)
             .attr('fill', d => d.fill)
-            .on('click', handleClickedRectClick); // Use clicked rect click handler
+            .on('click', handleCsvRectClick); // Use clicked rect click handler
 
     // Remove previous clicked rects
     rects.exit().remove();
@@ -111,86 +112,6 @@ function appendNewData(newData) {
     // Join the new clicked data for text elements
     const texts = svg.selectAll('text')
         .data(clickedData, d => d.id);
-
-    // Update existing text elements
-    texts.attr('x', d => d.x + d.width / 2)
-        .attr('y', d => d.y + d.height / 2)
-        .attr('text-anchor', 'middle')
-        .attr('dy', '.35em')
-        .each(function(d) {
-            const textElement = d3.select(this);
-            textElement.text(d.value);
-            adjustFontSize(textElement, d);
-        });
-
-    // Append new text elements
-    texts.enter()
-        .append('text')
-            .attr('x', d => d.x + d.width / 2)
-            .attr('y', d => d.y + d.height / 2)
-            .attr('text-anchor', 'middle')
-            .attr('dy', '.35em')
-            .each(function(d) {
-                const textElement = d3.select(this);
-                textElement.text(d.value);
-                adjustFontSize(textElement, d);
-            });
-
-    // Remove old text elements
-    texts.exit().remove();
-}
-
-// Clicked rect click handler
-function handleClickedRectClick(d) {
-    console.log(d.data);
-
-    fetch('/post_bar_data', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(d.data)
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log('Response from server:', data);
-        // Add new data to the visualization within new container
-        appendNewDataToNewContainer(data.result);
-    })
-    .catch(error => {
-        console.error('Error:', error);
-    });
-}
-
-// Function to append new data to the new container
-function appendNewDataToNewContainer(newData) {
-    // Join the new data to rects in the new container
-    const rects = newSvg.selectAll('rect')
-        .data(newData, d => d.id);
-
-    // Update the attributes of existing rects
-    rects.attr('y', d => d.y)
-        .attr('x', d => d.x)
-        .attr('height', d => d.height)
-        .attr('width', d => d.width)
-        .attr('fill', d => d.fill);
-
-    // Append new rects
-    rects.enter()
-        .append('rect')
-            .attr('y', d => d.y)
-            .attr('x', d => d.x)
-            .attr('height', d => d.height)
-            .attr('width', d => d.width)
-            .attr('fill', d => d.fill)
-            .on('click', handleClickedRectClick); // Reuse clicked rect click handler
-
-    // Remove previous rects
-    rects.exit().remove();
-
-    // Join the new data for text elements
-    const texts = newSvg.selectAll('text')
-        .data(newData, d => d.id);
 
     // Update existing text elements
     texts.attr('x', d => d.x + d.width / 2)
