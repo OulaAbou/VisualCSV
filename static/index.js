@@ -36,7 +36,7 @@ function createVisualization(data) {
 
 // CSV rect click handler
 function handleCsvRectClick(d) {
-    console.log(d.data);
+    // console.log(d.data);
 
     fetch('/post_bar_data', {
         method: 'POST',
@@ -103,8 +103,7 @@ function appendNewData(newData) {
             .attr('x', d => d.x)
             .attr('height', d => d.height)
             .attr('width', d => d.width)
-            .attr('fill', d => d.fill)
-            .on('click', handleCsvRectClick); // Use clicked rect click handler
+            .attr('fill', d => d.fill);
 
     // Remove previous clicked rects
     rects.exit().remove();
