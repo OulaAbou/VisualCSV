@@ -32,9 +32,17 @@ class Bar:
     
 class Column:
 
-    def __init__(self, index, data = []):
-        self.index = index
+    def __init__(self, id, x, y, height, width, color, data = []):
+        self.id = id
+        self.x = x
+        self.y = y
+        self.height = height
+        self.width = width
+        self.color = color
         self.data = data
+    
+    def __str__(self):
+        return f"Column(x={self.x}, y={self.y}, height={self.height}, width={self.width}, color={self.color}, data={self.data})"
 
 class Grid: 
 
@@ -199,6 +207,44 @@ class Grid:
             })
 
         return JSON_data
+    
+    def generate_columns(self):
+        matrix = self.create_matrix()
+        columns = []
+
+        id = 0
+        x = 20
+
+        for i, column in enumerate(matrix): 
+            column_object = Column(id, x, 20, len(column), 10, "black", column)
+            columns.append(column_object)
+            x += 20
+            id += 1
+
+        return columns
+    
+    def write_columns (self):
+        columns = self.generate_columns()
+        JSON_data = []
+
+        for column in columns:
+            data = []
+            for data_point in column.data:
+                data.append({
+                    'value': data_point.value,
+                    'type': data_point.type,
+                    'color': data_point.color
+                })
+            JSON_data.append({
+                'id': column.id,
+                'x': column.x,
+                'y': column.y,
+                'height': column.height,
+                'width': column.width,
+                'fill': column.color,
+                'data': data
+            })
+        return JSON_data
 
 
         
@@ -209,10 +255,10 @@ grid1 = Grid('./Data/top_1000_films.csv')
 # # print(grid1.write_grid())
 
 
-json_grid1 = './top_1000_films.json'
+json_grid1 = './top_1000_films_columns.json'
 
 with open(json_grid1, 'w') as write_data:
-     json.dump(grid1.write_grid(), write_data, indent=4)
+     json.dump(grid1.write_columns(), write_data, indent=4)
 
 
 
