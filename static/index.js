@@ -189,36 +189,6 @@ function createColumnVisualization(data) {
     rects.exit().remove();
 }
 
-// // New function to create visualization for columns (similar structure to createVisualization)
-// function createColumnVisualization(data) {
-//     columnsData = columnsData.concat(data); // Combine new data with existing data
-
-//     // Join the data to rects
-//     const rects = svg3.selectAll('rect')
-//         .data(columnsData);
-
-//     // Add attrs to rects already in the DOM
-//     rects.attr('y', d => d.y)
-//         .attr('x', d => d.x)
-//         .attr('height', d => d.height)
-//         .attr('width', d => d.width)
-//         .attr('fill', d => d.fill)
-//         .on('click', (d) => handleColumnClick(d.data));  // Pass the necessary data
-
-//     // Append the enter selection to the DOM
-//     rects.enter()
-//         .append('rect')
-//             .attr('y', d => d.y)
-//             .attr('x', d => d.x)
-//             .attr('height', d => d.height)
-//             .attr('width', d => d.width)
-//             .attr('fill', d => d.fill)
-//             .on('click', (d) => handleColumnClick(d.data));  // Pass the necessary data
-
-//     // Remove any rects that are no longer in the data
-//     rects.exit().remove();
-// }
-
 // New function to handle column click (similar structure to handleClick)
 function handleColumnClick(data) {
     // Update inspectedColumnsData with new data
