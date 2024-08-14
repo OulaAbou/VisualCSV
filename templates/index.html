@@ -18,9 +18,6 @@
 
         /* Button styling */
         .fetch-button {
-            position: absolute;
-            top: 10px;
-            right: 10px;
             z-index: 10;
             padding: 10px 20px;
             background-color: #007BFF;
@@ -32,6 +29,20 @@
 
         .fetch-button:hover {
             background-color: #0056b3;
+        }
+
+        /* First button specific placement */
+        .fetch-button-first {
+            position: absolute;
+            top: 10px;
+            right: 150px; /* Adjust this value for spacing between buttons */
+        }
+
+        /* Second button specific placement */
+        .fetch-button-second {
+            position: absolute;
+            top: 10px;
+            right: 10px;
         }
 
         /* SVG container styling */
@@ -63,38 +74,16 @@
             height: auto;
             padding-top: 10px;
         }
-
-        /* New second container styling */
-        .second-container {
-            width: 800px;
-            height: 500px;
-            border: 2px solid black;
-            padding: 10px;
-            margin: 20px auto;
-            overflow: auto;
-            position: relative;
-        }
     </style>
 </head>
 <body>
     <div class="container">
-        <button class="fetch-button" id="fetch-columns">Fetch Data</button>
-        <div class="canva">
-            <svg width="6000" height="6000">
-                <rect></rect>
-            </svg>
-        </div>
-        <div class="new-container">
-            <div>
-                <svg width="100%" height="100%">
-                    <rect></rect>
-                </svg>
-            </div>
-        </div>
-    </div>
+        <!-- First Button -->
+        <button class="fetch-button fetch-button-first" id="fetch-columns">Fetch Data</button>
+        
+        <!-- Second Button -->
+        <button class="fetch-button fetch-button-second" id="fetch-data">Fetch Types</button>
 
-    <div class="second-container">
-        <button class="fetch-button" id="fetch-data">Fetch Types</button>
         <div class="canva">
             <svg width="6000" height="6000">
                 <rect></rect>

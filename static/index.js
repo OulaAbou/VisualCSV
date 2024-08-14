@@ -1,7 +1,7 @@
-const svg = d3.select('.second-container .canva svg');
-const svg2 = d3.select('.second-container .new-container div svg');
-const svg3 = d3.select('.container .canva svg');
-const svg4 = d3.select('.container .new-container div svg');
+// const svg = d3.select('.second-container .canva svg');
+// const svg2 = d3.select('.second-container .new-container div svg');
+const svg = d3.select('.container .canva svg');
+const svg2 = d3.select('.container .new-container div svg');
 
 
 let allData = [];
@@ -162,7 +162,7 @@ function createColumnVisualization(data) {
     }
 
     // Join the data to rects
-    const rects = svg3.selectAll('rect')
+    const rects = svg.selectAll('rect')
         .data(columnsData);
 
     // Add attrs to rects already in the DOM
@@ -199,15 +199,15 @@ function handleColumnClick(data) {
     const textPadding = 10; // Padding around text inside the rectangle
 
     // Calculate the center x position for the rectangles
-    const containerWidth = svg4.node().getBoundingClientRect().width;
+    const containerWidth = svg2.node().getBoundingClientRect().width;
 
     // Create a dummy text element to measure text width
-    const dummyText = svg4.append('text')
+    const dummyText = svg2.append('text')
         .attr('font-size', '12px')
         .attr('visibility', 'hidden');
 
     // Update rectangles
-    const rects = svg4.selectAll('rect')
+    const rects = svg2.selectAll('rect')
         .data(inspectedColumnsData);
 
     // Compute width based on text length
@@ -239,12 +239,12 @@ function handleColumnClick(data) {
     // Remove rects that are no longer in the data
     rects.exit().remove();
 
-    // Update the height of the svg4 container
+    // Update the height of the svg2 container
     const totalHeight = inspectedColumnsData.length * (rectHeight + padding);
-    svg4.attr('height', totalHeight);
+    svg2.attr('height', totalHeight);
 
     // Update text elements
-    const texts = svg4.selectAll('text')
+    const texts = svg2.selectAll('text')
         .data(inspectedColumnsData);
 
     // Update existing text elements
@@ -277,6 +277,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const columnsButton = d3.select('#fetch-columns');
     
     dataButton.on('click', () => {
+        svg2.selectAll('*').remove();
         const fileName = 'top_1000_films.csv';
         fetch(`/get_data?file=${fileName}`)
             .then(response => response.json())
@@ -290,6 +291,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     columnsButton.on('click', () => {
+        svg2.selectAll('*').remove();
         const fileName = 'top_1000_films.csv';
         fetch(`/get_columns?file=${fileName}`)
             .then(response => response.json())
