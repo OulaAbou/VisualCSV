@@ -1,13 +1,26 @@
 const svg = d3.select('.container .canva svg');
 const svg2 = d3.select('.container .new-container div svg');
 
-
 let allData = [];
 let allInspectedData = [];
 let columnsData = [];
 let inspectedColumnsData = [];
 
-// Function to create visualization (same as before)
+// Define drag behavior
+const dragHandler = d3.drag()
+    .on('start', function (event, d) {
+        d3.select(this).raise().attr('stroke', 'black');
+    })
+    .on('drag', function (event, d) {
+        d3.select(this)
+            .attr('x', d.x = event.x)
+            .attr('y', d.y = event.y);
+    })
+    .on('end', function (event, d) {
+        d3.select(this).attr('stroke', null);
+    });
+
+// Function to create visualization (updated to include drag functionality)
 function createVisualization(data) {
     allData = allData.concat(data); // Combine new data with existing data
 
@@ -21,7 +34,8 @@ function createVisualization(data) {
         .attr('height', d => d.height)
         .attr('width', d => d.width)
         .attr('fill', d => d.fill)
-        .on('click', (event, d) => handleClick(d.data));  // Pass the necessary data
+        .on('click', (d) => handleClick(d.data))  // Pass the necessary data
+        .call(dragHandler); // Attach drag behavior
 
     // Append the enter selection to the DOM
     rects.enter()
@@ -31,7 +45,8 @@ function createVisualization(data) {
             .attr('height', d => d.height)
             .attr('width', d => d.width)
             .attr('fill', d => d.fill)
-            .on('click', (event, d) => handleClick(d.data));  // Pass the necessary data
+            .on('click', (d) => handleClick(d.data))  // Pass the necessary data
+            .call(dragHandler); // Attach drag behavior
 
     // Remove any rects that are no longer in the data
     rects.exit().remove();
@@ -119,6 +134,7 @@ function handleClick(data) {
     texts.exit().remove();
 }
 
+// Updated createColumnVisualization to add drag functionality
 function createColumnVisualization(data) {
     columnsData = columnsData.concat(data); // Combine new data with existing data
 
@@ -169,8 +185,9 @@ function createColumnVisualization(data) {
         .attr('height', d => d.height)
         .attr('width', d => d.width)
         .attr('fill', d => d.fill)
-        .on('click', (event, d) => handleColumnClick(d.data))  // Pass the necessary data
-        .on('contextmenu', handleRightClick);  // Add right-click event
+        .on('click', d => handleColumnClick(d.data))  // Pass the necessary data
+        .on('contextmenu', handleRightClick)  // Add right-click event
+        .call(dragHandler); // Attach drag behavior
 
     // Append the enter selection to the DOM
     rects.enter()
@@ -180,8 +197,9 @@ function createColumnVisualization(data) {
             .attr('height', d => d.height)
             .attr('width', d => d.width)
             .attr('fill', d => d.fill)
-            .on('click', (event, d) => handleColumnClick(d.data))  // Pass the necessary data
-            .on('contextmenu', handleRightClick);  // Add right-click event
+            .on('click', d => handleColumnClick(d.data))  // Pass the necessary data
+            .on('contextmenu', handleRightClick)  // Add right-click event
+            .call(dragHandler); // Attach drag behavior
 
     // Remove any rects that are no longer in the data
     rects.exit().remove();
