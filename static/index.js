@@ -1,5 +1,3 @@
-// const svg = d3.select('.second-container .canva svg');
-// const svg2 = d3.select('.second-container .new-container div svg');
 const svg = d3.select('.container .canva svg');
 const svg2 = d3.select('.container .new-container div svg');
 
@@ -23,7 +21,7 @@ function createVisualization(data) {
         .attr('height', d => d.height)
         .attr('width', d => d.width)
         .attr('fill', d => d.fill)
-        .on('click', (d) => handleClick(d.data));  // Pass the necessary data
+        .on('click', (event, d) => handleClick(d.data));  // Pass the necessary data
 
     // Append the enter selection to the DOM
     rects.enter()
@@ -33,7 +31,7 @@ function createVisualization(data) {
             .attr('height', d => d.height)
             .attr('width', d => d.width)
             .attr('fill', d => d.fill)
-            .on('click', (d) => handleClick(d.data));  // Pass the necessary data
+            .on('click', (event, d) => handleClick(d.data));  // Pass the necessary data
 
     // Remove any rects that are no longer in the data
     rects.exit().remove();
@@ -171,7 +169,7 @@ function createColumnVisualization(data) {
         .attr('height', d => d.height)
         .attr('width', d => d.width)
         .attr('fill', d => d.fill)
-        .on('click', d => handleColumnClick(d.data))  // Pass the necessary data
+        .on('click', (event, d) => handleColumnClick(d.data))  // Pass the necessary data
         .on('contextmenu', handleRightClick);  // Add right-click event
 
     // Append the enter selection to the DOM
@@ -182,7 +180,7 @@ function createColumnVisualization(data) {
             .attr('height', d => d.height)
             .attr('width', d => d.width)
             .attr('fill', d => d.fill)
-            .on('click', d => handleColumnClick(d.data))  // Pass the necessary data
+            .on('click', (event, d) => handleColumnClick(d.data))  // Pass the necessary data
             .on('contextmenu', handleRightClick);  // Add right-click event
 
     // Remove any rects that are no longer in the data
