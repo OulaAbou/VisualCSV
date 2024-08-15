@@ -12,9 +12,14 @@ const dragHandler = d3.drag()
         d3.select(this).raise().attr('stroke', 'black');
     })
     .on('drag', function (event, d) {
+        // Update data to reflect new position
+        d.x = event.x;
+        d.y = event.y;
+
+        // Move the dragged rectangle
         d3.select(this)
-            .attr('x', d.x = event.x)
-            .attr('y', d.y = event.y);
+            .attr('x', d.x)
+            .attr('y', d.y);
     })
     .on('end', function (event, d) {
         d3.select(this).attr('stroke', null);
@@ -24,20 +29,20 @@ const dragHandler = d3.drag()
 function createVisualization(data) {
     allData = allData.concat(data); // Combine new data with existing data
 
-    // Join the data to rects
+    // Join the data to rects, using a unique key (e.g., 'id')
     const rects = svg.selectAll('rect')
-        .data(allData);
+        .data(allData, d => d.id);  // Ensure there's a unique key like 'id'
 
-    // Add attrs to rects already in the DOM
+    // Update existing rects
     rects.attr('y', d => d.y)
         .attr('x', d => d.x)
         .attr('height', d => d.height)
         .attr('width', d => d.width)
         .attr('fill', d => d.fill)
-        .on('click', (d) => handleClick(d.data))  // Pass the necessary data
+        .on('click', (event, d) => handleClick(d.data))  // Pass the necessary data
         .call(dragHandler); // Attach drag behavior
 
-    // Append the enter selection to the DOM
+    // Append new rects for the enter selection
     rects.enter()
         .append('rect')
             .attr('y', d => d.y)
@@ -45,12 +50,13 @@ function createVisualization(data) {
             .attr('height', d => d.height)
             .attr('width', d => d.width)
             .attr('fill', d => d.fill)
-            .on('click', (d) => handleClick(d.data))  // Pass the necessary data
+            .on('click', (event, d) => handleClick(d.data))  // Pass the necessary data
             .call(dragHandler); // Attach drag behavior
 
     // Remove any rects that are no longer in the data
     rects.exit().remove();
 }
+
 
 // Function to handle click (same as before)
 function handleClick(data) {
@@ -185,7 +191,7 @@ function createColumnVisualization(data) {
         .attr('height', d => d.height)
         .attr('width', d => d.width)
         .attr('fill', d => d.fill)
-        .on('click', d => handleColumnClick(d.data))  // Pass the necessary data
+        .on('click', (event, d) => handleColumnClick(d.data))  // Pass the necessary data
         .on('contextmenu', handleRightClick)  // Add right-click event
         .call(dragHandler); // Attach drag behavior
 
@@ -197,7 +203,7 @@ function createColumnVisualization(data) {
             .attr('height', d => d.height)
             .attr('width', d => d.width)
             .attr('fill', d => d.fill)
-            .on('click', d => handleColumnClick(d.data))  // Pass the necessary data
+            .on('click', (event, d) => handleColumnClick(d.data))  // Pass the necessary data
             .on('contextmenu', handleRightClick)  // Add right-click event
             .call(dragHandler); // Attach drag behavior
 
