@@ -1,14 +1,189 @@
-const svg = d3.select('svg');
-let allData = [];
-let clickedData = []; // Track data from clicked rectangles
+const svg = d3.select('.container .canva svg');
+const svg2 = d3.select('.container .new-container div svg');
 
-// Function to create visualization
+let allData = [];
+let allInspectedData = [];
+let columnsData = [];
+let inspectedColumnsData = [];
+
+// Define drag behavior
+const dragHandler = d3.drag()
+    .on('start', function (event, d) {
+        d3.select(this).raise().attr('stroke', 'black');
+    })
+    .on('drag', function (event, d) {
+        // Update data to reflect new position
+        d.x = event.x;
+        d.y = event.y;
+
+        // Move the dragged rectangle
+        d3.select(this)
+            .attr('x', d.x)
+            .attr('y', d.y);
+    })
+    .on('end', function (event, d) {
+        d3.select(this).attr('stroke', null);
+    });
+
+// Function to create visualization (updated to include drag functionality)
 function createVisualization(data) {
     allData = allData.concat(data); // Combine new data with existing data
 
+    // Join the data to rects, using a unique key (e.g., 'id')
+    const rects = svg.selectAll('rect')
+        .data(allData, d => d.id);  // Ensure there's a unique key like 'id'
+
+    // Update existing rects
+    rects.attr('y', d => d.y)
+        .attr('x', d => d.x)
+        .attr('height', d => d.height)
+        .attr('width', d => d.width)
+        .attr('fill', d => d.fill)
+        .on('click', (event, d) => handleClick(d.data))  // Pass the necessary data
+        .call(dragHandler); // Attach drag behavior
+
+    // Append new rects for the enter selection
+    rects.enter()
+        .append('rect')
+            .attr('y', d => d.y)
+            .attr('x', d => d.x)
+            .attr('height', d => d.height)
+            .attr('width', d => d.width)
+            .attr('fill', d => d.fill)
+            .on('click', (event, d) => handleClick(d.data))  // Pass the necessary data
+            .call(dragHandler); // Attach drag behavior
+
+    // Remove any rects that are no longer in the data
+    rects.exit().remove();
+}
+
+
+// Function to handle click (same as before)
+function handleClick(data) {
+    // Update allInspectedData with new data
+    allInspectedData = data;
+
+    const rectHeight = 20;  // Example height for each rect
+    const padding = 5;      // Padding between rects
+    const textPadding = 10; // Padding around text inside the rectangle
+
+    // Calculate the center x position for the rectangles
+    const containerWidth = svg2.node().getBoundingClientRect().width;
+
+    // Create a dummy text element to measure text width
+    const dummyText = svg2.append('text')
+        .attr('font-size', '12px')
+        .attr('visibility', 'hidden');
+
+    // Update rectangles
+    const rects = svg2.selectAll('rect')
+        .data(allInspectedData);
+
+    // Compute width based on text length
+    allInspectedData.forEach(d => {
+        dummyText.text(d.value);
+        const textWidth = dummyText.node().getBBox().width;
+        d.width = textWidth + 2 * textPadding; // Adjust width for padding
+    });
+
+    // Remove dummy text element
+    dummyText.remove();
+
+    // Update existing rects
+    rects.attr('y', (d, i) => i * (rectHeight + padding)) 
+        .attr('x', d => (containerWidth - d.width) / 2)  // Center horizontally based on dynamic width
+        .attr('height', rectHeight)
+        .attr('width', d => d.width)  // Set width based on text length
+        .attr('fill', d => d.color);
+
+    // Append new rects for enter selection
+    rects.enter()
+        .append('rect')
+            .attr('y', (d, i) => i * (rectHeight + padding)) 
+            .attr('x', d => (containerWidth - d.width) / 2)  // Center horizontally based on dynamic width
+            .attr('height', rectHeight)
+            .attr('width', d => d.width)  // Set width based on text length
+            .attr('fill', d => d.color);
+
+    // Remove rects that are no longer in the data
+    rects.exit().remove();
+
+    // Update the height of the svg2 container
+    const totalHeight = allInspectedData.length * (rectHeight + padding);
+    svg2.attr('height', totalHeight);
+
+    // Update text elements
+    const texts = svg2.selectAll('text')
+        .data(allInspectedData);
+
+    // Update existing text elements
+    texts.attr('x', d => (containerWidth - d.width) / 2 + d.width / 2)  // Center text horizontally based on dynamic width
+        .attr('y', (d, i) => i * (rectHeight + padding) + (rectHeight / 2))  // Center vertically
+        .attr('dy', '.35em')  // Vertical alignment adjustment
+        .text(d => d.value)
+        .attr('fill', 'white')  // Text color
+        .attr('font-size', '12px')  // Font size
+        .attr('text-anchor', 'middle');  // Center text horizontally
+
+    // Append new text elements for enter selection
+    texts.enter()
+        .append('text')
+            .attr('x', d => (containerWidth - d.width) / 2 + d.width / 2)  // Center text horizontally based on dynamic width
+            .attr('y', (d, i) => i * (rectHeight + padding) + (rectHeight / 2))  // Center vertically
+            .attr('dy', '.35em')  // Vertical alignment adjustment
+            .text(d => d.value)
+            .attr('fill', 'white')  // Text color
+            .attr('font-size', '12px')  // Font size
+            .attr('text-anchor', 'middle');  // Center text horizontally
+
+    // Remove text elements that are no longer in the data
+    texts.exit().remove();
+}
+
+// Updated createColumnVisualization to add drag functionality
+function createColumnVisualization(data) {
+    columnsData = columnsData.concat(data); // Combine new data with existing data
+
+    // Function to handle right-click
+    function handleRightClick(d) {
+        d3.event.preventDefault(); // Prevent the default context menu
+        
+        // Remove any existing context menu
+        d3.select('.context-menu').remove();
+        
+        // Create and position the context menu
+        const contextMenu = d3.select('body')
+            .append('div')
+            .attr('class', 'context-menu')
+            .style('position', 'absolute')
+            .style('left', `${d3.event.pageX}px`)
+            .style('top', `${d3.event.pageY}px`)
+            .style('background-color', 'white')
+            .style('border', '1px solid black')
+            .style('padding', '5px');
+        
+        // Add menu items
+        const menuItems = ['Action 1', 'Action 2', 'Action 3'];
+        contextMenu.selectAll('div')
+            .data(menuItems)
+            .enter()
+            .append('div')
+            .text(item => item)
+            .style('cursor', 'pointer')
+            .on('click', function(item) {
+                console.log(`Clicked ${item} for data:`, d);
+                contextMenu.remove(); // Remove the menu after clicking
+            });
+        
+        // Close the menu when clicking outside
+        d3.select('body').on('click.context-menu', () => {
+            contextMenu.remove();
+        });
+    }
+
     // Join the data to rects
     const rects = svg.selectAll('rect')
-        .data(allData);
+        .data(columnsData);
 
     // Add attrs to rects already in the DOM
     rects.attr('y', d => d.y)
@@ -16,7 +191,9 @@ function createVisualization(data) {
         .attr('height', d => d.height)
         .attr('width', d => d.width)
         .attr('fill', d => d.fill)
-        .on('click', handleCsvRectClick); // Use CSV click handler
+        .on('click', (event, d) => handleColumnClick(d.data))  // Pass the necessary data
+        .on('contextmenu', handleRightClick)  // Add right-click event
+        .call(dragHandler); // Attach drag behavior
 
     // Append the enter selection to the DOM
     rects.enter()
@@ -26,157 +203,126 @@ function createVisualization(data) {
             .attr('height', d => d.height)
             .attr('width', d => d.width)
             .attr('fill', d => d.fill)
-            .on('click', handleCsvRectClick); // Use CSV click handler
+            .on('click', (event, d) => handleColumnClick(d.data))  // Pass the necessary data
+            .on('contextmenu', handleRightClick)  // Add right-click event
+            .call(dragHandler); // Attach drag behavior
 
     // Remove any rects that are no longer in the data
     rects.exit().remove();
 }
 
-// CSV rect click handler
-function handleCsvRectClick(d) {
-    console.log(d.data);
+// New function to handle column click (similar structure to handleClick)
+function handleColumnClick(data) {
+    // Update inspectedColumnsData with new data
+    inspectedColumnsData = data;
 
-    fetch('/post_bar_data', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(d.data)
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log('Response from server:', data);
-        // Add new data to the visualization
-        appendNewData(data.result);
-    })
-    .catch(error => {
-        console.error('Error:', error);
+    const rectHeight = 20;  // Example height for each rect
+    const padding = 5;      // Padding between rects
+    const textPadding = 10; // Padding around text inside the rectangle
+
+    // Calculate the center x position for the rectangles
+    const containerWidth = svg2.node().getBoundingClientRect().width;
+
+    // Create a dummy text element to measure text width
+    const dummyText = svg2.append('text')
+        .attr('font-size', '12px')
+        .attr('visibility', 'hidden');
+
+    // Update rectangles
+    const rects = svg2.selectAll('rect')
+        .data(inspectedColumnsData);
+
+    // Compute width based on text length
+    inspectedColumnsData.forEach(d => {
+        dummyText.text(d.value);
+        const textWidth = dummyText.node().getBBox().width;
+        d.width = textWidth + 2 * textPadding; // Adjust width for padding
     });
-}
 
-// Function to calculate maximum font size
-function calculateFontSize(d) {
-    const maxFontSize = Math.min(d.width, d.height) * 0.6; // Adjust factor as needed
-    return Math.max(10, maxFontSize); // Set a minimum font size
-}
+    // Remove dummy text element
+    dummyText.remove();
 
-// Function to adjust font size to fit within the rectangle
-function adjustFontSize(textElement, d) {
-    let fontSize = calculateFontSize(d);
-    textElement.style('font-size', `${fontSize}px`);
+    // Update existing rects
+    rects.attr('y', (d, i) => i * (rectHeight + padding)) 
+        .attr('x', d => (containerWidth - d.width) / 2)  // Center horizontally based on dynamic width
+        .attr('height', rectHeight)
+        .attr('width', d => d.width)  // Set width based on text length
+        .attr('fill', d => d.color);
 
-    // Check if text overflows and adjust font size
-    let bbox = textElement.node().getBBox();
-    while (bbox.width > d.width || bbox.height > d.height) {
-        fontSize -= 1; // Reduce font size by 1px
-        textElement.style('font-size', `${fontSize}px`);
-        bbox = textElement.node().getBBox();
-    }
-}
-
-// Function to append new data to the existing visualization
-function appendNewData(newData) {
-    // Clear previous clickedData
-    clickedData = newData.map(d => ({...d, isClicked: true})); // Tag new data as clicked
-
-    // Update allData to remove previously clicked data
-    allData = allData.filter(d => !d.isClicked).concat(clickedData); // Combine only non-clicked data with new clicked data
-
-    // Join the combined data
-    const rects = svg.selectAll('rect')
-        .data(allData, d => d.id);
-
-    // Update the attributes of existing rects
-    rects.attr('y', d => d.y)
-        .attr('x', d => d.x)
-        .attr('height', d => d.height)
-        .attr('width', d => d.width)
-        .attr('fill', d => d.fill);
-
-    // Append new rects
+    // Append new rects for enter selection
     rects.enter()
         .append('rect')
-            .attr('class', d => d.isClicked ? 'clicked' : '')
-            .attr('y', d => d.y)
-            .attr('x', d => d.x)
-            .attr('height', d => d.height)
-            .attr('width', d => d.width)
-            .attr('fill', d => d.fill)
-            .on('click', handleClickedRectClick); // Use clicked rect click handler
+            .attr('y', (d, i) => i * (rectHeight + padding)) 
+            .attr('x', d => (containerWidth - d.width) / 2)  // Center horizontally based on dynamic width
+            .attr('height', rectHeight)
+            .attr('width', d => d.width)  // Set width based on text length
+            .attr('fill', d => d.color);
 
-    // Remove previous clicked rects
+    // Remove rects that are no longer in the data
     rects.exit().remove();
 
-    // Join the new clicked data for text elements
-    const texts = svg.selectAll('text')
-        .data(clickedData, d => d.id);
+    // Update the height of the svg2 container
+    const totalHeight = inspectedColumnsData.length * (rectHeight + padding);
+    svg2.attr('height', totalHeight);
+
+    // Update text elements
+    const texts = svg2.selectAll('text')
+        .data(inspectedColumnsData);
 
     // Update existing text elements
-    texts.attr('x', d => d.x + d.width / 2)
-        .attr('y', d => d.y + d.height / 2)
-        .attr('text-anchor', 'middle')
-        .attr('dy', '.35em')
-        .each(function(d) {
-            const textElement = d3.select(this);
-            textElement.text(d.value);
-            adjustFontSize(textElement, d);
-        });
+    texts.attr('x', d => (containerWidth - d.width) / 2 + d.width / 2)  // Center text horizontally based on dynamic width
+        .attr('y', (d, i) => i * (rectHeight + padding) + (rectHeight / 2))  // Center vertically
+        .attr('dy', '.35em')  // Vertical alignment adjustment
+        .text(d => d.value)
+        .attr('fill', 'white')  // Text color
+        .attr('font-size', '12px')  // Font size
+        .attr('text-anchor', 'middle');  // Center text horizontally
 
-    // Append new text elements
+    // Append new text elements for enter selection
     texts.enter()
         .append('text')
-            .attr('x', d => d.x + d.width / 2)
-            .attr('y', d => d.y + d.height / 2)
-            .attr('text-anchor', 'middle')
-            .attr('dy', '.35em')
-            .each(function(d) {
-                const textElement = d3.select(this);
-                textElement.text(d.value);
-                adjustFontSize(textElement, d);
-            });
+            .attr('x', d => (containerWidth - d.width) / 2 + d.width / 2)  // Center text horizontally based on dynamic width
+            .attr('y', (d, i) => i * (rectHeight + padding) + (rectHeight / 2))  // Center vertically
+            .attr('dy', '.35em')  // Vertical alignment adjustment
+            .text(d => d.value)
+            .attr('fill', 'white')  // Text color
+            .attr('font-size', '12px')  // Font size
+            .attr('text-anchor', 'middle');  // Center text horizontally
 
-    // Remove old text elements
+    // Remove text elements that are no longer in the data
     texts.exit().remove();
 }
 
-// Clicked rect click handler
-function handleClickedRectClick(d) {
-    console.log(d.data);
-
-    fetch('/post_bar_data', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(d.data)
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log('Response from server:', data);
-        // Add new data to the visualization
-        appendNewData(data.result);
-    })
-    .catch(error => {
-        console.error('Error:', error);
+// Ensure the buttons are selected and the event listeners are attached correctly
+document.addEventListener('DOMContentLoaded', () => {
+    const dataButton = d3.select('#fetch-data');
+    const columnsButton = d3.select('#fetch-columns');
+    
+    dataButton.on('click', () => {
+        svg2.selectAll('*').remove();
+        const fileName = 'top_1000_films.csv';
+        fetch(`/get_data?file=${fileName}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    console.error(data.error);
+                } else {
+                    createVisualization(data);
+                }
+            });
     });
-}
 
-// Create buttons and fetch data as before
-const button = document.createElement('button');
-button.textContent = 'Fetch Data';
-button.style.position = 'fixed';
-button.style.top = '10px';
-button.style.right = '10px';
-button.addEventListener('click', () => {
-    const fileName = 'top_1000_films.csv';
-    fetch(`/get_data?file=${fileName}`)
-        .then(response => response.json())
-        .then(data => {
-            if (data.error) {
-                console.error(data.error);
-            } else {
-                createVisualization(data);
-            }
-        });
+    columnsButton.on('click', () => {
+        svg2.selectAll('*').remove();
+        const fileName = 'top_1000_films.csv';
+        fetch(`/get_columns?file=${fileName}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    console.error(data.error);
+                } else {
+                    createColumnVisualization(data);
+                }
+            });
+    });
 });
-document.body.appendChild(button);
