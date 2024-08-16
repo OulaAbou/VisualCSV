@@ -140,28 +140,27 @@ function handleClick(data) {
     texts.exit().remove();
 }
 
-// Updated createColumnVisualization to add drag functionality
 function createColumnVisualization(data) {
     columnsData = columnsData.concat(data); // Combine new data with existing data
 
     // Function to handle right-click
-    function handleRightClick(d) {
-        d3.event.preventDefault(); // Prevent the default context menu
-        
+    function handleRightClick(event, d) {
+        event.preventDefault(); // Prevent the default context menu
+
         // Remove any existing context menu
         d3.select('.context-menu').remove();
-        
+
         // Create and position the context menu
         const contextMenu = d3.select('body')
             .append('div')
             .attr('class', 'context-menu')
             .style('position', 'absolute')
-            .style('left', `${d3.event.pageX}px`)
-            .style('top', `${d3.event.pageY}px`)
+            .style('left', `${event.pageX}px`)
+            .style('top', `${event.pageY}px`)
             .style('background-color', 'white')
             .style('border', '1px solid black')
             .style('padding', '5px');
-        
+
         // Add menu items
         const menuItems = ['Action 1', 'Action 2', 'Action 3'];
         contextMenu.selectAll('div')
@@ -174,7 +173,7 @@ function createColumnVisualization(data) {
                 console.log(`Clicked ${item} for data:`, d);
                 contextMenu.remove(); // Remove the menu after clicking
             });
-        
+
         // Close the menu when clicking outside
         d3.select('body').on('click.context-menu', () => {
             contextMenu.remove();
