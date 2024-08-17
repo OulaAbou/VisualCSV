@@ -142,6 +142,91 @@ function handleClick(data) {
 
 
 
+// function createColumnVisualization(data) {
+//     console.log("Received data:", data);  // Debug log
+
+//     // Filter out any undefined or null items
+//     columnsData = data.filter(item => item != null);
+
+//     console.log("Filtered columnsData:", columnsData);  // Debug log
+
+//     // Join the data to rects
+//     const rects = svg.selectAll('rect')
+//         .data(columnsData, d => {
+//             if (d && d.id) {
+//                 return d.id;
+//             } else {
+//                 console.error("Invalid data item:", d);  // Debug log
+//                 return null;  // or some fallback value
+//             }
+//         });
+
+//     // Update existing rects
+//     rects.attr('y', d => d.y)
+//         .attr('x', d => d.x)
+//         .attr('height', d => d.height)
+//         .attr('width', d => d.width)
+//         .attr('fill', d => d.fill)
+//         .on('click', (event, d) => handleColumnClick(d.data))
+//         .on('contextmenu', handleRightClick)
+//         .call(dragHandler);
+
+//     // Append new rects
+//     rects.enter()
+//         .append('rect')
+//         .attr('y', d => d.y)
+//         .attr('x', d => d.x)
+//         .attr('height', d => d.height)
+//         .attr('width', d => d.width)
+//         .attr('fill', d => d.fill)
+//         .on('click', (event, d) => handleColumnClick(d.data))
+//         .on('contextmenu', handleRightClick)
+//         .call(dragHandler);
+
+//     // Remove old rects
+//     rects.exit().remove();
+
+//     console.log("Visualization updated");  // Debug log
+// }
+
+// function handleRightClick(event, d) {
+//     event.preventDefault();
+//     d3.select('.context-menu').remove();
+
+//     const contextMenu = d3.select('body')
+//         .append('div')
+//         .attr('class', 'context-menu')
+//         .style('position', 'absolute')
+//         .style('left', `${event.pageX}px`)
+//         .style('top', `${event.pageY}px`)
+//         .style('background-color', 'white')
+//         .style('border', '1px solid black')
+//         .style('padding', '5px');
+
+//     const menuItems = ['Delete', 'Action 2', 'Action 3'];
+//     contextMenu.selectAll('div')
+//         .data(menuItems)
+//         .enter()
+//         .append('div')
+//         .text(item => item)
+//         .style('cursor', 'pointer')
+//         .on('click', function(event, item) {
+//             if (item === 'Delete') {
+//                 // Remove the data from columnsData
+//                 columnsData = columnsData.filter(data => data !== d);
+//                 // Redraw the visualization
+//                 createColumnVisualization(columnsData);
+//             } else {
+//                 console.log(`Clicked ${item} for data:`, d);
+//             }
+//             contextMenu.remove();
+//         });
+
+//     d3.select('body').on('click.context-menu', () => {
+//         contextMenu.remove();
+//     });
+// }
+
 function createColumnVisualization(data) {
     console.log("Received data:", data);  // Debug log
 
@@ -153,10 +238,11 @@ function createColumnVisualization(data) {
     // Join the data to rects
     const rects = svg.selectAll('rect')
         .data(columnsData, d => {
-            if (d && d.id) {
+            if (d && d.id !== undefined) {
                 return d.id;
             } else {
-                console.error("Invalid data item:", d);  // Debug log
+                console.warn("Data item without id:", d);  // Changed to warning
+                console.log(d);  // Debug log
                 return null;  // or some fallback value
             }
         });
@@ -213,7 +299,8 @@ function handleRightClick(event, d) {
         .on('click', function(event, item) {
             if (item === 'Delete') {
                 // Remove the data from columnsData
-                columnsData = columnsData.filter(data => data !== d);
+                columnsData = columnsData.filter(data => data.id !== d.id);
+                console.log("Data after deletion:", columnsData); // Debug log
                 // Redraw the visualization
                 createColumnVisualization(columnsData);
             } else {
@@ -226,7 +313,6 @@ function handleRightClick(event, d) {
         contextMenu.remove();
     });
 }
-
 // New function to handle column click (similar structure to handleClick)
 function handleColumnClick(data) {
     // Update inspectedColumnsData with new data
