@@ -9,7 +9,7 @@ let inspectedColumnsData = [];
 // Define drag behavior
 const dragHandler = d3.drag()
     .on('start', function (event, d) {
-        d3.select(this).raise().attr('stroke', 'black');
+        d3.select(this).raise().attr('stroke', 'gold');
     })
     .on('drag', function (event, d) {
         // Update data to reflect new position
