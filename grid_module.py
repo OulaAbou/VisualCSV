@@ -87,15 +87,15 @@ class Grid:
     def define_color (type):
         # Define the color mapping
         color_map = {
-            's': 'green',
-            'e': 'grey',
-            'i': 'blue',
-            'f': 'black',
-            'b': 'red',
-            'l': 'purple', ##for now list, set and tuple are treated the same
-            't': 'purple',
-            'd': 'orange',
-            'S': 'purple'
+            's': '#4caf50',  # Darker muted green
+            'e': '#757575',  # Darker muted grey
+            'i': '#3f51b5',  # Darker muted blue
+            'f': '#212121',  # Very dark grey (near black)
+            'b': '#d32f2f',  # Darker muted red
+            'l': '#7b1fa2',  # Darker muted purple
+            't': '#7b1fa2',  # Darker muted purple (same as 'l')
+            'd': '#f57c00',  # Darker muted orange
+            'S': '#7b1fa2'   # Darker muted purple (same as 'l' and 't')
         }
 
         return color_map.get(type, 'unknown')
@@ -208,6 +208,21 @@ class Grid:
 
         return JSON_data
     
+    # def generate_columns(self):
+    #     matrix = self.create_matrix()
+    #     columns = []
+
+    #     id = 0
+    #     x = 12
+
+    #     for i, column in enumerate(matrix): 
+    #         column_object = Column(id, x, 20, len(column), 10, "black", column)
+    #         columns.append(column_object)
+    #         x += 12
+    #         id += 1
+
+    #     return columns
+
     def generate_columns(self):
         matrix = self.create_matrix()
         columns = []
@@ -215,13 +230,51 @@ class Grid:
         id = 0
         x = 12
 
-        for i, column in enumerate(matrix): 
-            column_object = Column(id, x, 20, len(column), 10, "black", column)
+        for i, column in enumerate(matrix):
+            # Dictionary to count occurrences of each type
+            type_counts = {
+                's': 0,
+                'e': 0,
+                'i': 0,
+                'f': 0,
+                'b': 0,
+                'l': 0,
+                't': 0,
+                'd': 0,
+                'S': 0
+            }
+
+            # Count the types in the column
+            for data_point in column:
+                if data_point.type:
+                    type_counts[data_point.type] += 1
+
+            # Calculate the total number of data points in the column
+            total_count = len(column)
+
+            # Calculate the percentage of each type
+            color_percentages = {}
+            for type_key, count in type_counts.items():
+                percentage = (count / total_count) * 100 if total_count > 0 else 0
+                color = Grid.define_color(type_key)
+                if percentage > 0:
+                    color_percentages[color] = percentage
+
+            # Calculate the sum of percentages
+            total_percentage = sum(color_percentages.values())
+
+            # If the total percentage is less than 100, add the remaining as grey
+            if total_percentage < 100:
+                color_percentages['grey'] = 100 - total_percentage
+
+            # Create a Column object with color percentages as its color attribute
+            column_object = Column(id, x, 20, len(column), 10, color_percentages, column)
             columns.append(column_object)
             x += 12
             id += 1
 
         return columns
+
     
     def write_columns (self):
         columns = self.generate_columns()

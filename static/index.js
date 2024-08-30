@@ -143,13 +143,49 @@ function handleClick(data) {
     texts.exit().remove();
 }
 
+
 function createColumnVisualization(data) {
     console.log("Received data:", data);  // Debug log
 
     // Filter out any undefined or null items
-    columnsData = data.filter(item => item != null);
+    const columnsData = data.filter(item => item != null);
 
     console.log("Filtered columnsData:", columnsData);  // Debug log
+
+    // Clear previous gradients
+    svg.select("defs").remove();
+
+    // Create a `defs` element to hold gradients
+    const defs = svg.append("defs");
+
+    // Iterate over the data to create gradients
+    columnsData.forEach(d => {
+        if (d.fill && typeof d.fill === 'object') {
+            const gradientId = `gradient-${d.id}`;
+
+            // Create a linear gradient for vertical color distribution (top to bottom)
+            const gradient = defs.append("linearGradient")
+                .attr("id", gradientId)
+                .attr("x1", "0%")
+                .attr("x2", "0%")
+                .attr("y1", "0%")
+                .attr("y2", "100%"); // Vertical gradient
+
+            let offset = 0;
+            for (const [color, percentage] of Object.entries(d.fill)) {
+                gradient.append("stop")
+                    .attr("offset", `${offset}%`)
+                    .attr("stop-color", color);
+                offset += percentage; // Increase offset by the percentage value
+                gradient.append("stop")
+                    .attr("offset", `${offset}%`)
+                    .attr("stop-color", color);
+            }
+
+            // Assign the gradient ID to the data item for later use
+            d.gradientId = gradientId;
+        }
+    });
 
     // Join the data to rects
     const rects = svg.selectAll('rect')
@@ -168,7 +204,7 @@ function createColumnVisualization(data) {
         .attr('x', d => d.x)
         .attr('height', d => d.height)
         .attr('width', d => d.width)
-        .attr('fill', d => d.fill)
+        .attr('fill', d => d.gradientId ? `url(#${d.gradientId})` : '#000') // Use gradient if available, otherwise fallback color
         .on('click', (event, d) => handleColumnClick(d.data))
         .on('contextmenu', function(event, d) {
             console.log("Context menu event on rectangle");
@@ -183,7 +219,7 @@ function createColumnVisualization(data) {
         .attr('x', d => d.x)
         .attr('height', d => d.height)
         .attr('width', d => d.width)
-        .attr('fill', d => d.fill)
+        .attr('fill', d => d.gradientId ? `url(#${d.gradientId})` : '#000') // Use gradient if available, otherwise fallback color
         .on('click', (event, d) => handleColumnClick(d.data))
         .on('contextmenu', handleRightClick)
         .call(dragHandler);
@@ -194,44 +230,6 @@ function createColumnVisualization(data) {
     console.log("Visualization updated");  // Debug log
 }
 
-// function handleRightClick(event, d) {
-//     event.preventDefault();
-//     d3.select('.context-menu').remove();
-
-//     const contextMenu = d3.select('body')
-//         .append('div')
-//         .attr('class', 'context-menu')
-//         .style('position', 'absolute')
-//         .style('left', `${event.pageX}px`)
-//         .style('top', `${event.pageY}px`)
-//         .style('background-color', 'white')
-//         .style('border', '1px solid black')
-//         .style('padding', '5px');
-
-//     const menuItems = ['Delete', 'Change Type', 'Action 3'];
-//     contextMenu.selectAll('div')
-//         .data(menuItems)
-//         .enter()
-//         .append('div')
-//         .text(item => item)
-//         .style('cursor', 'pointer')
-//         .on('click', function(event, item) {
-//             if (item === 'Delete') {
-//                 // Remove the data from columnsData
-//                 columnsData = columnsData.filter(data => data.id !== d.id);
-//                 console.log("Data after deletion:", columnsData); // Debug log
-//                 // Redraw the visualization
-//                 createColumnVisualization(columnsData);
-//             } else {
-//                 console.log(`Clicked ${item} for data:`, d);
-//             }
-//             contextMenu.remove();
-//         });
-
-//     d3.select('body').on('click.context-menu', () => {
-//         contextMenu.remove();
-//     });
-// }
 
 function handleRightClick(event, d) {
     console.log("Right-click event triggered");
