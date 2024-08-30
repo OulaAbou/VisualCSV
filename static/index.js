@@ -6,6 +6,9 @@ let allInspectedData = [];
 let columnsData = [];
 let inspectedColumnsData = [];
 
+
+console.log("D3 version:", d3.version);
+
 // Define drag behavior
 const dragHandler = d3.drag()
     .on('start', function (event, d) {
@@ -167,7 +170,10 @@ function createColumnVisualization(data) {
         .attr('width', d => d.width)
         .attr('fill', d => d.fill)
         .on('click', (event, d) => handleColumnClick(d.data))
-        .on('contextmenu', handleRightClick)
+        .on('contextmenu', function(event, d) {
+            console.log("Context menu event on rectangle");
+            handleRightClick(event, d);
+        })
         .call(dragHandler);
 
     // Append new rects
@@ -188,10 +194,53 @@ function createColumnVisualization(data) {
     console.log("Visualization updated");  // Debug log
 }
 
-function handleRightClick(event, d) {
-    event.preventDefault();
-    d3.select('.context-menu').remove();
+// function handleRightClick(event, d) {
+//     event.preventDefault();
+//     d3.select('.context-menu').remove();
 
+//     const contextMenu = d3.select('body')
+//         .append('div')
+//         .attr('class', 'context-menu')
+//         .style('position', 'absolute')
+//         .style('left', `${event.pageX}px`)
+//         .style('top', `${event.pageY}px`)
+//         .style('background-color', 'white')
+//         .style('border', '1px solid black')
+//         .style('padding', '5px');
+
+//     const menuItems = ['Delete', 'Change Type', 'Action 3'];
+//     contextMenu.selectAll('div')
+//         .data(menuItems)
+//         .enter()
+//         .append('div')
+//         .text(item => item)
+//         .style('cursor', 'pointer')
+//         .on('click', function(event, item) {
+//             if (item === 'Delete') {
+//                 // Remove the data from columnsData
+//                 columnsData = columnsData.filter(data => data.id !== d.id);
+//                 console.log("Data after deletion:", columnsData); // Debug log
+//                 // Redraw the visualization
+//                 createColumnVisualization(columnsData);
+//             } else {
+//                 console.log(`Clicked ${item} for data:`, d);
+//             }
+//             contextMenu.remove();
+//         });
+
+//     d3.select('body').on('click.context-menu', () => {
+//         contextMenu.remove();
+//     });
+// }
+
+function handleRightClick(event, d) {
+    console.log("Right-click event triggered");
+    event.preventDefault();
+    
+    // Remove any existing context menus
+    d3.selectAll('.context-menu').remove();
+
+    console.log("Creating context menu");
     const contextMenu = d3.select('body')
         .append('div')
         .attr('class', 'context-menu')
@@ -200,32 +249,87 @@ function handleRightClick(event, d) {
         .style('top', `${event.pageY}px`)
         .style('background-color', 'white')
         .style('border', '1px solid black')
-        .style('padding', '5px');
+        .style('padding', '5px')
+        .style('z-index', '1000');  // Ensure it's on top
 
-    const menuItems = ['Delete', 'Action 2', 'Action 3'];
-    contextMenu.selectAll('div')
+    console.log("Context menu created:", contextMenu.node());
+
+    const menuItems = ['Delete', 'Change Type', 'Action 3'];
+
+    console.log("Adding menu items");
+    contextMenu.selectAll('.menu-item')
         .data(menuItems)
         .enter()
         .append('div')
+        .attr('class', 'menu-item')
         .text(item => item)
         .style('cursor', 'pointer')
+        .style('padding', '5px')
+        .style('hover', 'background-color: #f0f0f0')
         .on('click', function(event, item) {
+            console.log(`Clicked on menu item: ${item}`);
             if (item === 'Delete') {
-                // Remove the data from columnsData
                 columnsData = columnsData.filter(data => data.id !== d.id);
-                console.log("Data after deletion:", columnsData); // Debug log
-                // Redraw the visualization
+                console.log("Data after deletion:", columnsData);
                 createColumnVisualization(columnsData);
+                contextMenu.remove();
+            } else if (item === 'Change Type') {
+                showTypeOptions(event, d);
             } else {
-                console.log(`Clicked ${item} for data:`, d);
+                console.log(`Action for ${item} not implemented`);
             }
             contextMenu.remove();
         });
 
+    console.log("Menu items added");
+
+    // Prevent the context menu from closing immediately
+    contextMenu.on('contextmenu', () => event.preventDefault());
+
+    // Close the context menu when clicking outside
     d3.select('body').on('click.context-menu', () => {
+        console.log("Body clicked, removing context menu");
         contextMenu.remove();
     });
+
+    console.log("Context menu setup complete");
 }
+
+function showTypeOptions(event, d) {
+    console.log("Showing type options");
+    d3.selectAll('.context-menu').remove();
+
+    const typeOptions = ['String', 'Integer', 'Float', 'Date', 'Boolean'];
+
+    const typeMenu = d3.select('body')
+        .append('div')
+        .attr('class', 'context-menu')
+        .style('position', 'absolute')
+        .style('left', `${event.pageX}px`)
+        .style('top', `${event.pageY}px`)
+        .style('background-color', 'white')
+        .style('border', '1px solid black')
+        .style('padding', '5px')
+        .style('z-index', '1000');
+
+    typeMenu.selectAll('.type-option')
+        .data(typeOptions)
+        .enter()
+        .append('div')
+        .attr('class', 'type-option')
+        .text(type => type)
+        .style('cursor', 'pointer')
+        .style('padding', '5px')
+        .style('hover', 'background-color: #f0f0f0')
+        .on('click', function(event, type) {
+            console.log(`Changed type to ${type} for data:`, d);
+            // Implement the logic to change the type here
+            typeMenu.remove();
+        });
+
+    console.log("Type options menu created");
+}
+
 // New function to handle column click (similar structure to handleClick)
 function handleColumnClick(data) {
     // Update inspectedColumnsData with new data
