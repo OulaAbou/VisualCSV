@@ -207,21 +207,6 @@ class Grid:
             })
 
         return JSON_data
-    
-    # def generate_columns(self):
-    #     matrix = self.create_matrix()
-    #     columns = []
-
-    #     id = 0
-    #     x = 12
-
-    #     for i, column in enumerate(matrix): 
-    #         column_object = Column(id, x, 20, len(column), 10, "black", column)
-    #         columns.append(column_object)
-    #         x += 12
-    #         id += 1
-
-    #     return columns
 
     def generate_columns(self):
         matrix = self.create_matrix()
