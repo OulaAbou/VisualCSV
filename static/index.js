@@ -194,45 +194,6 @@ function createColumnVisualization(data) {
     console.log("Visualization updated");  // Debug log
 }
 
-// function handleRightClick(event, d) {
-//     event.preventDefault();
-//     d3.select('.context-menu').remove();
-
-//     const contextMenu = d3.select('body')
-//         .append('div')
-//         .attr('class', 'context-menu')
-//         .style('position', 'absolute')
-//         .style('left', `${event.pageX}px`)
-//         .style('top', `${event.pageY}px`)
-//         .style('background-color', 'white')
-//         .style('border', '1px solid black')
-//         .style('padding', '5px');
-
-//     const menuItems = ['Delete', 'Change Type', 'Action 3'];
-//     contextMenu.selectAll('div')
-//         .data(menuItems)
-//         .enter()
-//         .append('div')
-//         .text(item => item)
-//         .style('cursor', 'pointer')
-//         .on('click', function(event, item) {
-//             if (item === 'Delete') {
-//                 // Remove the data from columnsData
-//                 columnsData = columnsData.filter(data => data.id !== d.id);
-//                 console.log("Data after deletion:", columnsData); // Debug log
-//                 // Redraw the visualization
-//                 createColumnVisualization(columnsData);
-//             } else {
-//                 console.log(`Clicked ${item} for data:`, d);
-//             }
-//             contextMenu.remove();
-//         });
-
-//     d3.select('body').on('click.context-menu', () => {
-//         contextMenu.remove();
-//     });
-// }
-
 function handleRightClick(event, d) {
     console.log("Right-click event triggered");
     event.preventDefault();
