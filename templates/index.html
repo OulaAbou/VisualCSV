@@ -3,16 +3,101 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>grid</title>
+    <title>Grid</title>
+    <style>
+        /* Container styling */
+        .container {
+            width: 800px;
+            height: 500px;
+            border: 2px solid black;
+            padding: 10px;
+            margin: 20px auto;
+            overflow: auto;
+            position: relative;
+        }
+
+        /* Button styling */
+        .fetch-button {
+            z-index: 10;
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .fetch-button:hover {
+            background-color: #0056b3;
+        }
+
+        /* First button specific placement */
+        .fetch-button-first {
+            position: absolute;
+            top: 10px;
+            right: 150px; /* Adjust this value for spacing between buttons */
+        }
+
+        /* Second button specific placement */
+        .fetch-button-second {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+
+        /* SVG container styling */
+        .canva {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* New container styling */
+        .new-container {
+            position: absolute;
+            left: 50%;
+            top: 13%;
+            width: 40%;
+            height: 80%;
+            border: 2px solid black;
+            overflow: auto;
+        }
+
+        .new-container div {
+            position: relative;
+            width: 100%;
+            height: auto;
+            padding-top: 10px;
+        }
+    </style>
 </head>
 <body>
-    <div class="canva">
-        <svg width= 6000 height=6000>
-            <rect></rect>
-        </svg>
+    <div class="container">
+        <!-- First Button -->
+        <button class="fetch-button fetch-button-first" id="fetch-columns">Fetch Data</button>
+        
+        <!-- Second Button -->
+        <button class="fetch-button fetch-button-second" id="fetch-data">Fetch Types</button>
+
+        <div class="canva">
+            <svg width="6000" height="6000">
+                <rect></rect>
+            </svg>
+        </div>
+        <div class="new-container">
+            <div>
+                <svg width="100%" height="100%">
+                    <rect></rect>
+                </svg>
+            </div>
+        </div>
     </div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.7.0/d3.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
     <script src="../static/index.js"></script>
-    
 </body>
 </html>

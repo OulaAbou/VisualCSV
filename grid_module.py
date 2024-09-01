@@ -1,6 +1,48 @@
 import numpy as np
 import ast
 import json
+# from data_point_module import DataPoint
+
+class DataPoint:
+
+    def __init__(self, x, y, value, type, color):
+        self.x = x
+        self.y = y
+        self.value = value
+        self.type = type
+        self.color = color
+
+    def __str__(self):
+        return f"DataPoint(x={self.x}, y={self.y}, value={self.value}, type={self.type}, color={self.color})"
+    
+class Bar:
+
+    def __init__(self, id, x, y, height, width, color, data = []):
+        self.id = id
+        self.x = x
+        self.y = y
+        self.height = height
+        self.width = width
+        self.color = color
+        self.data = data
+
+    
+    def __str__(self):
+        return f"Bar(x={self.x}, y={self.y}, height={self.height}, width={self.width}, color={self.color}, data={self.data})"
+    
+class Column:
+
+    def __init__(self, id, x, y, height, width, color, data = []):
+        self.id = id
+        self.x = x
+        self.y = y
+        self.height = height
+        self.width = width
+        self.color = color
+        self.data = data
+    
+    def __str__(self):
+        return f"Column(x={self.x}, y={self.y}, height={self.height}, width={self.width}, color={self.color}, data={self.data})"
 
 class Grid: 
 
@@ -41,41 +83,12 @@ class Grid:
         except (ValueError, SyntaxError):
             pass
         return 's'
-
-    def data_value (self):
-        rows = []
-        with open(self.filePath, 'r') as file:
-            for line in file:
-                words = line.strip().split(',')
-                value = []
-                for word in words:
-                    value.append(word)
-                rows.append(value)
-
-        rows_matrix = np.array(rows)
-        comlumns = rows_matrix.T
-        return comlumns
     
-    def define_metadata(self): 
-        rows = []
-        with open(self.filePath, 'r') as file:
-            for line in file:
-                words = line.strip().split(',')
-                meta_data = []
-                for word in words:
-                    meta_data.append(Grid._guess_type(word))
-                rows.append(meta_data)
-
-        rows_matrix = np.array(rows)
-        columns = rows_matrix.T
-        return columns
-    
-    def color_matrix(self):
-        matrix = self.define_metadata()
+    def define_color (type):
         # Define the color mapping
         color_map = {
             's': 'green',
-            'e': 'white',
+            'e': 'grey',
             'i': 'blue',
             'f': 'black',
             'b': 'red',
@@ -85,196 +98,168 @@ class Grid:
             'S': 'purple'
         }
 
-        # Vectorized approach using numpy's vectorize function
-        value_to_color = np.vectorize(lambda x: color_map.get(x, 'unknown'))
-        color_matrix = value_to_color(matrix)
-
-        return color_matrix
+        return color_map.get(type, 'unknown')
     
-    def _custom_clustering(data):
-        # Custom clustering function to cluster rows according to types
-        clusters = []
-        current_cluster = [data[0]]
+    ## DONE: Read file and assign data points using the class
 
-        for i in range(1, len(data)):
-            if data[i] == data[i-1]:
-                current_cluster.append(data[i])
-            else:
-                clusters.append(current_cluster)
-                current_cluster = [data[i]]
+    def create_matrix(self): 
+        rows = []
+        with open(self.filePath, 'r') as file:
+            y = 0
+            for line in file:
+                x = 0
+                words = line.strip().split(',')
+                meta_data = []
+                for word in words:
+                    type = Grid._guess_type(word)
+                    data_point = DataPoint(x, y, word, type, color= Grid.define_color(type))
+                    meta_data.append(data_point)
+                    x += 1
+                rows.append(meta_data)
+                y += 1
 
-        clusters.append(current_cluster)  # Append the last cluster
+        # Find the maximum length of the subarrays
+        max_length = max(len(subarray) for subarray in rows)
+        # Create a new array with the same number of subarrays, each of max_length, filled with empty strings
+        filled_array = np.full((len(rows), max_length),None,  dtype=object)
 
-        return clusters
-    
-    def _normalise_column_length(column):
-        # Normalise the length of each cluster within a column
-        cluster_length = []
-        for cluster in column:
-            cluster_length.append(len(cluster)/len(column))
+        # # Copy the elements from the original subarrays to the new array
+        # for i, subarray in enumerate(rows):
+        #     filled_array[i, :len(subarray)] = subarray
 
-        total = sum(cluster_length)
-        normalized_data = [round(val / total, 5) for val in cluster_length]
-        return normalized_data
+        # Copy the elements from the original subarrays to the new array and fill the rest with DataPoint objects
+        light_grey_js = '#D3D3D3'
 
-    def normalise_all_columns(self, columns):
-        # Normalise the length of each cluster within columns
-        # And return the normalised columns and color matrix
-      
-        normalised_columns = []
-        normalised_color_matrix = []
-        
-        for column in columns:
-            normalised_columns.append(Grid._normalise_column_length(Grid._custom_clustering(column)))
-            colour_cluster = []
-            for colour_list in Grid._custom_clustering(column):
-                colour_cluster.append(colour_list[0])
-            normalised_color_matrix.append(colour_cluster)
-        # print(normalised_color_matrix)
-        # print(normalised_columns)
-
-        return normalised_columns, normalised_color_matrix
-    
-
-    def _levenshtein_distance(str1, str2):
-        # Get the lengths of the input strings
-        m = len(str1)
-        n = len(str2)
-    
-        # Initialize two rows for dynamic programming
-        prev_row = [j for j in range(n + 1)]
-        curr_row = [0] * (n + 1)
-    
-        # Dynamic programming to fill the matrix
-        for i in range(1, m + 1):
-            # Initialize the first element of the current row
-            curr_row[0] = i
-    
-            for j in range(1, n + 1):
-                if str1[i - 1] == str2[j - 1]:
-                    # Characters match, no operation needed
-                    curr_row[j] = prev_row[j - 1]
+        for y, subarray in enumerate(rows):
+            for x in range(max_length):
+                if x < len(subarray):
+                    filled_array[y, x] = subarray[x]
                 else:
-                    # Choose the minimum cost operation
-                    curr_row[j] = 1 + min(
-                        curr_row[j - 1],  # Insert
-                        prev_row[j],      # Remove
-                        prev_row[j - 1]    # Replace
-                    )
+                    filled_array[y, x] = DataPoint(x, y, '', None, light_grey_js)
+
+        rows_matrix = np.array(filled_array)
+        columns = rows_matrix.T
+        return columns
     
-            # Update the previous row with the current row
-            prev_row = curr_row.copy()
+    ## Done: Make this so that it clsuters the whole matrix such that they are ready to be JSONified
+    def custom_clustering(self, data):
     
-        # The final element in the last row contains the Levenshtein distance
-        return curr_row[n]
-    
-    def _cluster_adjacent_columns(self, columns):
-    # Cluster columns based on the Levenshtein distance, considering only columns in order
-        # columns = self.color_matrix()
-        clusters = []
-        i = 0
-        
-        while i < len(columns):
-            # Create a new cluster starting with the current column
-            new_cluster = [i]
-            current_column = columns[i]
-            
-            # Check subsequent columns to see if they belong in the same cluster
-            for j in range(i + 1, len(columns)):
-                next_column = columns[j]
-                distance = Grid._levenshtein_distance(current_column, next_column)
-                if distance <= 20: #find a stable metric
-                    new_cluster.append(j)
-                    current_column = next_column  # Update current column to the last matched column
+        clustered_columns = []
+
+        for i, column in enumerate(data):
+            clusters = []
+            current_cluster = [column[0]]
+            for i in range(1, len(column)):
+                if column[i].type == column[i-1].type:
+                    current_cluster.append(column[i])
                 else:
-                    break  # Stop clustering if the next column doesn't match
-            
-            clusters.append(new_cluster)
-            i = new_cluster[-1] + 1  # Move to the next unclustered column
-        
-        return clusters
+                    clusters.append(current_cluster)
+                    current_cluster = [column[i]]
+            clusters.append(current_cluster)  # Append the last cluster
+            clustered_columns.append(clusters)
     
-    def cluster_columns (self):
-
-        data = self.color_matrix()
-
-        normalised_columns = []
-        normalised_color_matrix = []
-
-        for clusters in self._cluster_adjacent_columns(data):
-            normalised_columns.append(self.normalise_all_columns(data[clusters])[0])
-            normalised_color_matrix.append(self.normalise_all_columns(data[clusters])[1])
-        
-        return normalised_columns, normalised_color_matrix
+        return clustered_columns
     
-    
-    def generate_grid(self, clustering_type = 'non_adjacent'):
+    def generate_bars(self):
 
-        if clustering_type == 'non_adjacent':
-            return self.normalise_all_columns(self.color_matrix())
-        elif clustering_type == 'adjacent':
-            return self.cluster_columns()
+        matrix = self.create_matrix()
+        clustered_columns = self.custom_clustering(matrix)
+
+        bars = []
+
+        id = 0
+
+        for i, column in enumerate(clustered_columns):
+            y = 20
+            for j, cluster in enumerate(column):
+                bar = Bar(id, (i+1)*20, y, len(cluster), 10, cluster[0].color, cluster)
+                bars.append(bar)
+                y += len(cluster) 
+                id += 1   
         
-
+        return bars
+    
+    ## This is where you make it suitable for JSON. If you decide to drop JSON, then leave the rest as
+    ## it is.
+    
     def write_grid(self, clusering_type = 'non_adjacent'):
+        bars = self.generate_bars()
+        JSON_data = []
 
-        blocks = []
-        x_coordinate = 100
+        for bar in bars: 
+            data = []
+            for data_point in bar.data:
+                data.append({
+                    # 'x': data_point.x,
+                    # 'y': data_point.y,  ## This is not needed for now
+                    'value': data_point.value,
+                    'type': data_point.type,
+                    'color': data_point.color
+                })
+            JSON_data.append({
+                'id': bar.id,
+                'x': bar.x,
+                'y': bar.y,
+                'height': bar.height,
+                'width': bar.width,
+                'fill': bar.color,
+                'data': data
+            })
 
-        if clusering_type == 'non_adjacent':
-            grid = self.generate_grid()
-            for cluster_index in range (0, len(grid[0])):
-                y_coordinate = 26
-                for i in range(0, len(grid[0][cluster_index])) :
-                    data = {}
-                    data['x'] = x_coordinate
-                    data['y'] = y_coordinate
-                    data['height'] = round(grid[0][cluster_index][i], 5) * 100
-                    data['width'] = 10
-                    data['fill'] = grid[1][cluster_index][i]
-                    blocks.append(data)
-                    y_coordinate += data['height']
-                x_coordinate += 15
+        return JSON_data
+    
+    def generate_columns(self):
+        matrix = self.create_matrix()
+        columns = []
+
+        id = 0
+        x = 20
+
+        for i, column in enumerate(matrix): 
+            column_object = Column(id, x, 20, len(column), 10, "black", column)
+            columns.append(column_object)
+            x += 20
+            id += 1
+
+        return columns
+    
+    def write_columns (self):
+        columns = self.generate_columns()
+        JSON_data = []
+
+        for column in columns:
+            data = []
+            for data_point in column.data:
+                data.append({
+                    'value': data_point.value,
+                    'type': data_point.type,
+                    'color': data_point.color
+                })
+            JSON_data.append({
+                'id': column.id,
+                'x': column.x,
+                'y': column.y,
+                'height': column.height,
+                'width': column.width,
+                'fill': column.color,
+                'data': data
+            })
+        return JSON_data
 
 
-        elif clusering_type == 'adjacent':
-            grid = self.generate_grid('adjacent')
-            height = grid[0]
-            fill = grid[1]
-            for cluster_index in range(0, len(height)): 
-                width = 12/len(height[cluster_index])
-                for col_index in range(0, len(height[cluster_index])):
-                    y_coordinate = 146
-                    for bar_index in range (0, len(height[cluster_index][col_index])):
-                        data = {}
-                        data['x'] = x_coordinate
-                        data['y'] = y_coordinate
-                        data['height'] = height[cluster_index][col_index][bar_index] * 100
-                        data['width'] = width
-                        data['fill'] = fill[cluster_index][col_index][bar_index]
-                        blocks.append(data)
-                        y_coordinate += data['height']
-                    x_coordinate += width + 2
-                x_coordinate += 5
-                
-        return blocks
         
         
-# grid1 = Grid('./Data/archive/2015-16/champs.csv')
-# print(grid1.write_grid())
-# print(grid1.write_grid('adjacent'))
+        
+grid1 = Grid('./Data/top_1000_films.csv')
+# # print(grid1.custom_clustering(grid1.create_matrix()))
+# # print(grid1.write_grid())
 
 
-# ## TO DO: make this in a separate file
-# json_grid1 = './json/15-16-summarised-grid-non_adjacent.json'
+json_grid1 = './top_1000_films_columns.json'
 
-# with open(json_grid1, 'w') as write_data:
-#      json.dump(grid1.write_grid(), write_data, indent=4)
+with open(json_grid1, 'w') as write_data:
+     json.dump(grid1.write_columns(), write_data, indent=4)
 
-# json_grid2 = './json/15-16-summarised-grid-adjacent.json'
-
-# with open(json_grid2, 'w') as write_data:
-#      json.dump(grid1.write_grid('adjacent'), write_data, indent=4)
 
 
 
