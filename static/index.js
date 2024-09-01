@@ -6,10 +6,13 @@ let allInspectedData = [];
 let columnsData = [];
 let inspectedColumnsData = [];
 
+
+console.log("D3 version:", d3.version);
+
 // Define drag behavior
 const dragHandler = d3.drag()
     .on('start', function (event, d) {
-        d3.select(this).raise().attr('stroke', 'black');
+        d3.select(this).raise().attr('stroke', 'gold');
     })
     .on('drag', function (event, d) {
         // Update data to reflect new position
@@ -140,75 +143,152 @@ function handleClick(data) {
     texts.exit().remove();
 }
 
-// Updated createColumnVisualization to add drag functionality
 function createColumnVisualization(data) {
-    columnsData = columnsData.concat(data); // Combine new data with existing data
+    console.log("Received data:", data);  // Debug log
 
-    // Function to handle right-click
-    function handleRightClick(d) {
-        d3.event.preventDefault(); // Prevent the default context menu
-        
-        // Remove any existing context menu
-        d3.select('.context-menu').remove();
-        
-        // Create and position the context menu
-        const contextMenu = d3.select('body')
-            .append('div')
-            .attr('class', 'context-menu')
-            .style('position', 'absolute')
-            .style('left', `${d3.event.pageX}px`)
-            .style('top', `${d3.event.pageY}px`)
-            .style('background-color', 'white')
-            .style('border', '1px solid black')
-            .style('padding', '5px');
-        
-        // Add menu items
-        const menuItems = ['Action 1', 'Action 2', 'Action 3'];
-        contextMenu.selectAll('div')
-            .data(menuItems)
-            .enter()
-            .append('div')
-            .text(item => item)
-            .style('cursor', 'pointer')
-            .on('click', function(item) {
-                console.log(`Clicked ${item} for data:`, d);
-                contextMenu.remove(); // Remove the menu after clicking
-            });
-        
-        // Close the menu when clicking outside
-        d3.select('body').on('click.context-menu', () => {
-            contextMenu.remove();
-        });
-    }
+    // Filter out any undefined or null items
+    columnsData = data.filter(item => item != null);
+
+    console.log("Filtered columnsData:", columnsData);  // Debug log
 
     // Join the data to rects
     const rects = svg.selectAll('rect')
-        .data(columnsData);
+        .data(columnsData, d => {
+            if (d && d.id !== undefined) {
+                return d.id;
+            } else {
+                console.warn("Data item without id:", d);  // Changed to warning
+                console.log(d);  // Debug log
+                return null;  // or some fallback value
+            }
+        });
 
-    // Add attrs to rects already in the DOM
+    // Update existing rects
     rects.attr('y', d => d.y)
         .attr('x', d => d.x)
         .attr('height', d => d.height)
         .attr('width', d => d.width)
         .attr('fill', d => d.fill)
-        .on('click', (event, d) => handleColumnClick(d.data))  // Pass the necessary data
-        .on('contextmenu', handleRightClick)  // Add right-click event
-        .call(dragHandler); // Attach drag behavior
+        .on('click', (event, d) => handleColumnClick(d.data))
+        .on('contextmenu', function(event, d) {
+            console.log("Context menu event on rectangle");
+            handleRightClick(event, d);
+        })
+        .call(dragHandler);
 
-    // Append the enter selection to the DOM
+    // Append new rects
     rects.enter()
         .append('rect')
-            .attr('y', d => d.y)
-            .attr('x', d => d.x)
-            .attr('height', d => d.height)
-            .attr('width', d => d.width)
-            .attr('fill', d => d.fill)
-            .on('click', (event, d) => handleColumnClick(d.data))  // Pass the necessary data
-            .on('contextmenu', handleRightClick)  // Add right-click event
-            .call(dragHandler); // Attach drag behavior
+        .attr('y', d => d.y)
+        .attr('x', d => d.x)
+        .attr('height', d => d.height)
+        .attr('width', d => d.width)
+        .attr('fill', d => d.fill)
+        .on('click', (event, d) => handleColumnClick(d.data))
+        .on('contextmenu', handleRightClick)
+        .call(dragHandler);
 
-    // Remove any rects that are no longer in the data
+    // Remove old rects
     rects.exit().remove();
+
+    console.log("Visualization updated");  // Debug log
+}
+
+function handleRightClick(event, d) {
+    console.log("Right-click event triggered");
+    event.preventDefault();
+    
+    // Remove any existing context menus
+    d3.selectAll('.context-menu').remove();
+
+    console.log("Creating context menu");
+    const contextMenu = d3.select('body')
+        .append('div')
+        .attr('class', 'context-menu')
+        .style('position', 'absolute')
+        .style('left', `${event.pageX}px`)
+        .style('top', `${event.pageY}px`)
+        .style('background-color', 'white')
+        .style('border', '1px solid black')
+        .style('padding', '5px')
+        .style('z-index', '1000');  // Ensure it's on top
+
+    console.log("Context menu created:", contextMenu.node());
+
+    const menuItems = ['Delete', 'Change Type', 'Action 3'];
+
+    console.log("Adding menu items");
+    contextMenu.selectAll('.menu-item')
+        .data(menuItems)
+        .enter()
+        .append('div')
+        .attr('class', 'menu-item')
+        .text(item => item)
+        .style('cursor', 'pointer')
+        .style('padding', '5px')
+        .style('hover', 'background-color: #f0f0f0')
+        .on('click', function(event, item) {
+            console.log(`Clicked on menu item: ${item}`);
+            if (item === 'Delete') {
+                columnsData = columnsData.filter(data => data.id !== d.id);
+                console.log("Data after deletion:", columnsData);
+                createColumnVisualization(columnsData);
+                contextMenu.remove();
+            } else if (item === 'Change Type') {
+                showTypeOptions(event, d);
+            } else {
+                console.log(`Action for ${item} not implemented`);
+            }
+            contextMenu.remove();
+        });
+
+    console.log("Menu items added");
+
+    // Prevent the context menu from closing immediately
+    contextMenu.on('contextmenu', () => event.preventDefault());
+
+    // Close the context menu when clicking outside
+    d3.select('body').on('click.context-menu', () => {
+        console.log("Body clicked, removing context menu");
+        contextMenu.remove();
+    });
+
+    console.log("Context menu setup complete");
+}
+
+function showTypeOptions(event, d) {
+    console.log("Showing type options");
+    d3.selectAll('.context-menu').remove();
+
+    const typeOptions = ['String', 'Integer', 'Float', 'Date', 'Boolean'];
+
+    const typeMenu = d3.select('body')
+        .append('div')
+        .attr('class', 'context-menu')
+        .style('position', 'absolute')
+        .style('left', `${event.pageX}px`)
+        .style('top', `${event.pageY}px`)
+        .style('background-color', 'white')
+        .style('border', '1px solid black')
+        .style('padding', '5px')
+        .style('z-index', '1000');
+
+    typeMenu.selectAll('.type-option')
+        .data(typeOptions)
+        .enter()
+        .append('div')
+        .attr('class', 'type-option')
+        .text(type => type)
+        .style('cursor', 'pointer')
+        .style('padding', '5px')
+        .style('hover', 'background-color: #f0f0f0')
+        .on('click', function(event, type) {
+            console.log(`Changed type to ${type} for data:`, d);
+            // Implement the logic to change the type here
+            typeMenu.remove();
+        });
+
+    console.log("Type options menu created");
 }
 
 // New function to handle column click (similar structure to handleClick)
@@ -313,16 +393,24 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     columnsButton.on('click', () => {
-        svg2.selectAll('*').remove();
-        const fileName = 'top_1000_films.csv';
-        fetch(`/get_columns?file=${fileName}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.error) {
-                    console.error(data.error);
-                } else {
+    svg2.selectAll('*').remove();
+    const fileName = 'top_1000_films.csv';
+    fetch(`/get_columns?file=${fileName}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                console.error(data.error);
+            } else {
+                console.log("Fetched data:", data);  // Debug log
+                if (Array.isArray(data) && data.length > 0) {
                     createColumnVisualization(data);
+                } else {
+                    console.error("Invalid data format received");
                 }
-            });
-    });
+            }
+        })
+        .catch(error => {
+            console.error("Error fetching data:", error);
+        });
+});
 });

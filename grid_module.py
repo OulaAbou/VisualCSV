@@ -172,7 +172,7 @@ class Grid:
         for i, column in enumerate(clustered_columns):
             y = 20
             for j, cluster in enumerate(column):
-                bar = Bar(id, (i+1)*20, y, len(cluster), 10, cluster[0].color, cluster)
+                bar = Bar(id, (i+1)*12, y, len(cluster), 10, cluster[0].color, cluster)
                 bars.append(bar)
                 y += len(cluster) 
                 id += 1   
@@ -213,12 +213,12 @@ class Grid:
         columns = []
 
         id = 0
-        x = 20
+        x = 12
 
         for i, column in enumerate(matrix): 
             column_object = Column(id, x, 20, len(column), 10, "black", column)
             columns.append(column_object)
-            x += 20
+            x += 12
             id += 1
 
         return columns
