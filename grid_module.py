@@ -54,48 +54,48 @@ class Grid:
         try:
             # Check for integer
             int(value)
-            return 'i'
+            return 'int'
         except ValueError:
             pass
         try:
             # Check for float
             float(value)
-            return 'f'
+            return 'float'
         except ValueError:
             pass
         if len(value) == 0:
             # Check for empty string
-            return 'e'
+            return 'None'
         if value.lower() in ['true', 'false']:
             # Check for boolean
-            return 'b'
+            return 'boolean'
         try:
             # Safely evaluate literals
             evaluated_value = ast.literal_eval(value)
             if isinstance(evaluated_value, list):
-                return 'l'
+                return 'list'
             elif isinstance(evaluated_value, tuple):
-                return 't'
+                return 'tuple'
             elif isinstance(evaluated_value, dict):
-                return 'd'
+                return 'dict'
             elif isinstance(evaluated_value, set):
-                return 'S'
+                return 'set'
         except (ValueError, SyntaxError):
             pass
-        return 's'
+        return 'str'
     
     def define_color (type):
         # Define the color mapping
         color_map = {
-            's': 'green',
-            'e': 'grey',
-            'i': 'blue',
-            'f': 'black',
-            'b': 'red',
-            'l': 'purple', ##for now list, set and tuple are treated the same
-            't': 'purple',
-            'd': 'orange',
-            'S': 'purple'
+            'str': '#2E7D32',    # Darker Muted Green
+            'None': '#616161',   # Dark Grey
+            'int': '#1565C0',    # Darker Muted Blue
+            'float': '#4527A0',  # Darker Muted Deep Purple
+            'boolean': '#C62828',# Darker Muted Red
+            'list': '#EF6C00',   # Darker Muted Orange
+            'tuple': '#EF6C00',  # Same as 'list' to indicate similarity
+            'dict': '#FF8F00',   # Darker Muted Amber
+            'set': '#EF6C00'     # Same as 'list' and 'tuple'
         }
 
         return color_map.get(type, 'unknown')
