@@ -135,7 +135,7 @@ class Grid:
                 if x < len(subarray):
                     filled_array[y, x] = subarray[x]
                 else:
-                    filled_array[y, x] = DataPoint(x, y, '', None, light_grey_js)
+                    filled_array[y, x] = DataPoint(x, y, '', 'None', light_grey_js)
 
         rows_matrix = np.array(filled_array)
         columns = rows_matrix.T

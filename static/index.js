@@ -1,11 +1,9 @@
 const svg = d3.select('.container .canva svg');
 const svg2 = d3.select('.container .new-container div svg');
-const svg3 = d3.select('.container .bottom-container');
+const svg3 = d3.select('.container .bottom-container canva svg');
 
 let typesData = [];
 let inspectedTypesData = [];
-// let allData = [];
-// let allInspectedData = [];
 
 let columnsData = [];
 let inspectedColumnsData = [];
@@ -199,68 +197,6 @@ function createColumnVisualization(data) {
     console.log("Visualization updated");  // Debug log
 }
 
-// function handleRightClick(event, d) {
-//     // console.log("Right-click event triggered");
-//     event.preventDefault();
-    
-//     // Remove any existing context menus
-//     d3.selectAll('.context-menu').remove();
-
-//     // console.log("Creating context menu");
-//     const contextMenu = d3.select('body')
-//         .append('div')
-//         .attr('class', 'context-menu')
-//         .style('position', 'absolute')
-//         .style('left', `${event.pageX}px`)
-//         .style('top', `${event.pageY}px`)
-//         .style('background-color', 'white')
-//         .style('border', '1px solid black')
-//         .style('padding', '5px')
-//         .style('z-index', '1000');  // Ensure it's on top
-
-//     // console.log("Context menu created:", contextMenu.node());
-
-//     const menuItems = ['Delete', 'Change Type', 'Action 3'];
-
-//     // console.log("Adding menu items");
-//     contextMenu.selectAll('.menu-item')
-//         .data(menuItems)
-//         .enter()
-//         .append('div')
-//         .attr('class', 'menu-item')
-//         .text(item => item)
-//         .style('cursor', 'pointer')
-//         .style('padding', '5px')
-//         .style('hover', 'background-color: #f0f0f0')
-//         .on('click', function(event, item) {
-//             // console.log(`Clicked on menu item: ${item}`);
-//             if (item === 'Delete') {
-//                 columnsData = columnsData.filter(data => data.id !== d.id);
-//                 // console.log("Data after deletion:", columnsData);
-//                 createColumnVisualization(columnsData);
-//                 contextMenu.remove();
-//             } else if (item === 'Change Type') {
-//                 showTypeOptions(event, d);
-//             } else {
-//                 console.log(`Action for ${item} not implemented`);
-//             }
-//             contextMenu.remove();
-//         });
-
-//     // console.log("Menu items added");
-
-//     // Prevent the context menu from closing immediately
-//     contextMenu.on('contextmenu', () => event.preventDefault());
-
-//     // Close the context menu when clicking outside
-//     d3.select('body').on('click.context-menu', () => {
-//         // console.log("Body clicked, removing context menu");
-//         contextMenu.remove();
-//     });
-
-//     // console.log("Context menu setup complete");
-// }
-
 function handleRightClick(event, d) {
     event.preventDefault();
     
@@ -298,7 +234,7 @@ function handleRightClick(event, d) {
                 showTypeOptions(event, d);
                 contextMenu.remove(); // Remove after showing type options
             } else if (item === 'Sort') {
-                showSortOptions(event, d);
+                showSortOptions(event, d, columnsData);
                 contextMenu.remove(); // Remove after showing sort options
             }
         });
@@ -310,48 +246,8 @@ function handleRightClick(event, d) {
     });
 }
 
-// function showSortOptions(event, d) {
-//     // Remove any existing context menus
-//     d3.selectAll('.context-menu').remove();
 
-//     const sortOptions = ['Sort by Type', 'Sort by Value'];
-
-//     const sortMenu = d3.select('body')
-//         .append('div')
-//         .attr('class', 'context-menu')
-//         .style('position', 'absolute')
-//         .style('left', `${event.pageX}px`)
-//         .style('top', `${event.pageY}px`)
-//         .style('background-color', 'white')
-//         .style('border', '1px solid black')
-//         .style('padding', '5px')
-//         .style('z-index', '1000'); // Ensure it appears on top
-
-//     sortMenu.selectAll('.sort-option')
-//         .data(sortOptions)
-//         .enter()
-//         .append('div')
-//         .attr('class', 'sort-option')
-//         .text(option => option)
-//         .style('cursor', 'pointer')
-//         .style('padding', '5px')
-//         .on('click', function(event, option) {
-//             event.stopPropagation(); // Prevent event bubbling
-//             console.log(`Selected sorting option: ${option}`);
-//             // Implement sorting logic here
-//             sortMenu.remove();
-//         });
-
-//     // Close the sort menu when clicking outside
-//     d3.select('body').on('click.sort-menu', () => {
-//         sortMenu.remove();
-//     });
-
-//     // Prevent context menu from closing immediately
-//     sortMenu.on('contextmenu', () => event.preventDefault());
-// }
-
-function showSortOptions(event, d) {
+function showSortOptions(event, d, allColumns) {
     // Remove any existing context menus
     d3.selectAll('.context-menu').remove();
 
@@ -380,9 +276,9 @@ function showSortOptions(event, d) {
             event.stopPropagation(); // Prevent event bubbling
             
             if (option === 'Sort by Type') {
-                sortByType(d);
+                sortByType(d, allColumns);
             } else if (option === 'Sort by Value') {
-                sortByValue(d);
+                sortByValue(d, allColumns);
             }
 
             sortMenu.remove(); // Remove the sort menu after selecting an option
@@ -397,32 +293,44 @@ function showSortOptions(event, d) {
     sortMenu.on('contextmenu', () => event.preventDefault());
 }
 
-function sortByValue(columnData) {
-    // Exclude the first element and sort the rest by 'value'
-    columnData.data = [columnData.data[0]].concat(
-        columnData.data.slice(1).sort((a, b) => {
-            if (a.value < b.value) return -1;
-            if (a.value > b.value) return 1;
-            return 0;
-        })
-    );
+
+function sortByValue(selectedColumn, allColumns) {
+    // Exclude the first element and sort the rest by 'value' and store sorted indices
+    const sortedIndices = selectedColumn.data.slice(1)
+        .map((d, i) => i + 1)  // Skip the first element
+        .sort((a, b) => {
+            // Get the string values
+            const valueA = selectedColumn.data[a].value;
+            const valueB = selectedColumn.data[b].value;
+
+            // Use localeCompare for string comparison
+            return valueA.localeCompare(valueB);
+        });
+
+    // Reorder all columns based on sorted indices
+    reorderColumns(allColumns, sortedIndices);
 
     // Log sorted data to the console
-    console.log('Sorted by Value:', columnData);
+    console.log('Sorted by Value:', allColumns);
 }
 
-function sortByType(columnData) {
-    // Exclude the first element and sort the rest by 'type'
-    columnData.data = [columnData.data[0]].concat(
-        columnData.data.slice(1).sort((a, b) => {
-            if (a.type < b.type) return -1;
-            if (a.type > b.type) return 1;
-            return 0;
-        })
-    );
+function sortByType(selectedColumn, allColumns) {
+    // Exclude the first element and sort the rest by 'type' and store sorted indices
+    const sortedIndices = selectedColumn.data.slice(1)
+        .map((d, i) => i + 1)  // Skip the first element
+        .sort((a, b) => selectedColumn.data[a].type.localeCompare(selectedColumn.data[b].type));
+
+    // Reorder all columns based on sorted indices
+    reorderColumns(allColumns, sortedIndices);
 
     // Log sorted data to the console
-    console.log('Sorted by Type:', columnData);
+    console.log('Sorted by Type:', allColumns);
+}
+
+function reorderColumns(allColumns, sortedIndices) {
+    allColumns.forEach(column => {
+        column.data = [column.data[0]].concat(sortedIndices.map(i => column.data[i]));
+    });
 }
 
 
@@ -463,41 +371,6 @@ function showTypeOptions(event, d) {
     typeMenu.on('contextmenu', () => event.preventDefault());
 }
 
-
-function showTypeOptions(event, d) {
-    // console.log("Showing type options");
-    d3.selectAll('.context-menu').remove();
-
-    const typeOptions = ['String', 'Integer', 'Float', 'Date', 'Boolean'];
-
-    const typeMenu = d3.select('body')
-        .append('div')
-        .attr('class', 'context-menu')
-        .style('position', 'absolute')
-        .style('left', `${event.pageX}px`)
-        .style('top', `${event.pageY}px`)
-        .style('background-color', 'white')
-        .style('border', '1px solid black')
-        .style('padding', '5px')
-        .style('z-index', '1000');
-
-    typeMenu.selectAll('.type-option')
-        .data(typeOptions)
-        .enter()
-        .append('div')
-        .attr('class', 'type-option')
-        .text(type => type)
-        .style('cursor', 'pointer')
-        .style('padding', '5px')
-        .style('hover', 'background-color: #f0f0f0')
-        .on('click', function(event, type) {
-            // console.log(`Changed type to ${type} for data:`, d);
-            // Implement the logic to change the type here
-            typeMenu.remove();
-        });
-
-    // console.log("Type options menu created");
-}
 
 // New function to handle column click (similar structure to handleClick)
 function handleColumnClick(data) {
@@ -581,10 +454,27 @@ function handleColumnClick(data) {
     texts.exit().remove();
 }
 
+
+// Function to update and render visualization
+function renderUpdatedVisualization(data) {
+    console.log("Updating visualization with new data:", data);  // Debug log
+
+    
+}
+
+
+
 // Ensure the buttons are selected and the event listeners are attached correctly
 document.addEventListener('DOMContentLoaded', () => {
     const dataButton = d3.select('#fetch-data');
     const columnsButton = d3.select('#fetch-columns');
+    const updateButton = d3.select('#update-visualization');
+
+    updateButton.on('click', () => {
+        svg3.selectAll('*').remove();
+        renderUpdatedVisualization(columnsData)
+    });
+
     
     dataButton.on('click', () => {
         svg2.selectAll('*').remove();
