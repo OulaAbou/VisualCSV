@@ -455,89 +455,6 @@ function handleColumnClick(data) {
     texts.exit().remove();
 }
 
-
-
-// function updatedVisualisation(data) {
-//     console.log("Original data:", data);  // Debug log
-
-//     const newData = []; // New data to store clusters
-
-//     data.forEach(item => {
-//         let yPosition = item.y;  // Start at the original y position for the first cluster
-//         let cluster = [];  // Temporary cluster storage
-//         let currentType = null;  // Keep track of the current type
-
-//         item.data.forEach((dataItem, index) => {
-//             if (currentType === null || dataItem.type === currentType) {
-//                 // If it's the first item or the same type as the current cluster, add to the cluster
-//                 cluster.push(dataItem);
-//                 currentType = dataItem.type;
-//             } else {
-//                 // Different type, finalize the current cluster and start a new one
-//                 newData.push(createClusterElement(item, cluster, yPosition));
-//                 yPosition += cluster.length * 2; // Update y position for the next cluster
-//                 cluster = [dataItem];  // Start a new cluster
-//                 currentType = dataItem.type;
-//             }
-
-//             // If it's the last item, push the final cluster
-//             if (index === item.data.length - 1) {
-//                 newData.push(createClusterElement(item, cluster, yPosition));
-//             }
-//         });
-//     });
-
-//     console.log("New data after clustering:", newData);  // Debug log to check the updated data
-
-//     // Render the visualization with D3
-//     renderUpdatedVisualization(newData);
-// }
-
-// // Helper function to create a cluster element
-// function createClusterElement(originalItem, cluster, yPosition) {
-//     return {
-//         id: originalItem.id,  // Same ID as the original
-//         x: originalItem.x,  // Same x as the original
-//         y: yPosition,  // Calculated y position
-//         height: cluster.length,  // Height based on the number of items in the cluster
-//         width: originalItem.width,  // Same width as the original
-//         fill: cluster[0].color,  // Fill color of the first element in the cluster
-//         clusterData: cluster,  // The clustered data
-//         originalData: originalItem.data  // Original data
-//     };
-// }
-
-// // Function to render rectangles with D3
-// function renderUpdatedVisualization(newData) {
-//     // Bind data to rectangles
-//     const rects = svg3.selectAll("rect")
-//         .data(newData, d => `${d.id}-${d.x}-${d.y}`);  // Use a key function to ensure unique bindings
-
-//     // Enter selection to create new rectangles
-//     rects.enter()
-//         .append("rect")
-//         .attr("x", d => d.x)
-//         .attr("y", d => d.y)
-//         .attr("width", d => d.width)
-//         .attr("height", d => d.height)  
-//         .attr("fill", d => d.fill)
-//         // .attr("stroke", "black")
-//         // .attr("stroke-width", 1)
-//         .on('click', (event, d) => handleUpdatedVisualisationClick(d.originalData));  // Use originalData
-
-//     // Update selection to update existing rectangles
-//     rects
-//         .attr("x", d => d.x)
-//         .attr("y", d => d.y)
-//         .attr("width", d => d.width)
-//         .attr("height", d => d.height )  
-//         .attr("fill", d => d.fill)
-//         .on('click', (event, d) => handleUpdatedVisualisationClick(d.originalData));  // Use originalData
-
-//     // Exit selection to remove any unused rectangles
-//     rects.exit().remove();
-// }
-
 function updatedVisualisation(data) {
     console.log("Original data:", data);  // Debug log
 
@@ -587,36 +504,6 @@ function createClusterElement(column, cluster, columnIndex, yPosition) {
     };
 }
 
-// // Function to render rectangles with D3
-// function renderUpdatedVisualization(newData) {
-//     // Bind data to rectangles
-//     const rects = svg3.selectAll("rect")
-//         .data(newData, d => `${d.id}`);  // Use a key function to ensure unique bindings
-
-//     // Enter selection to create new rectangles
-//     rects.enter()
-//         .append("rect")
-//         .attr("x", d => d.x)
-//         .attr("y", d => d.y)
-//         .attr("width", d => d.width)
-//         .attr("height", d => d.height)  
-//         .attr("fill", d => d.fill)
-//         // .attr("stroke", "black")
-//         // .attr("stroke-width", 1)
-//         .on('click', (event, d) => handleUpdatedVisualisationClick(d.originalData));  // Use originalData
-
-//     // Update selection to update existing rectangles
-//     rects
-//         .attr("x", d => d.x)
-//         .attr("y", d => d.y)
-//         .attr("width", d => d.width)
-//         .attr("height", d => d.height)  
-//         .attr("fill", d => d.fill)
-//         .on('click', (event, d) => handleUpdatedVisualisationClick(d.originalData));  // Use originalData
-
-//     // Exit selection to remove any unused rectangles
-//     rects.exit().remove();
-// }
 function renderUpdatedVisualization(newData) {
     const svgHeight = 5000;  // The fixed height of the SVG container
     const totalDataHeight = d3.sum(newData, d => d.height);  // Sum of all data heights
